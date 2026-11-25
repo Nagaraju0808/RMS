@@ -3,9 +3,8 @@ import * as React from "react";
 import { Badge, Button, Card, Dialog, Input, Label, PageHeader, Select, Table, Tabs, Textarea, useToast } from "@/components/ui";
 import { api, rs } from "@/lib/client";
 import { useApp } from "@/components/app/AppContext";
+import { FoodDot } from "@/components/app/FoodDot";
 
-const FT_COLOR: Record<string, string> = { VEG: "green", NON_VEG: "red", EGG: "yellow", VEGAN: "blue" };
-export const FoodDot = ({ t }: { t: string }) => <span title={t} className={`inline-block h-3 w-3 rounded-sm border-2 ${t === "NON_VEG" ? "border-red-600" : t === "EGG" ? "border-yellow-500" : "border-green-600"}`} />;
 const toR = (p?: number | null) => (p == null ? "" : String(p / 100));
 const toP = (r: string) => (r === "" ? null : Math.round(Number(r) * 100));
 

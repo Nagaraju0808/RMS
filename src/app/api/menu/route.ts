@@ -7,7 +7,7 @@ export const GET = handler(async () => {
   const rid = s.restaurantId;
   const [categories, items, addonGroups, combos, schedules, stations, taxRates] = await Promise.all([
     prisma.category.findMany({ where: { restaurantId: rid }, orderBy: [{ sortOrder: "asc" }, { name: "asc" }] }),
-    prisma.menuItem.findMany({ where: { restaurantId: rid }, include: { variants: { orderBy: { sortOrder: "asc" } }, addonGroups: true }, orderBy: [{ sortOrder: "asc" }, { name: "asc" }] }),
+    prisma.menuItem.findMany({ where: { restaurantId: rid }, include: { variants: { orderBy: { sortOrder: "asc" } }, addonGroups: true }, orderBy: [{ category: { sortOrder: "asc" } }, { sortOrder: "asc" }] }),
     prisma.addonGroup.findMany({ where: { restaurantId: rid }, include: { addons: true } }),
     prisma.combo.findMany({ where: { restaurantId: rid }, include: { items: true } }),
     prisma.menuSchedule.findMany({ where: { restaurantId: rid } }),

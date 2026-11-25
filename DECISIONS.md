@@ -18,3 +18,13 @@
 11. **Menu delete**: items that were ever sold are archived (`active=false`) instead of deleted, so reports stay correct.
 12. **Prices in CSV/Excel** are written in rupees (e.g. 249.50) for humans; stored as paise.
 13. **Channel prices**: takeaway/online price blank = dine-in price. QR (at table) uses dine-in price.
+14. **Manager approval**: complimentary items always need an OWNER/MANAGER (own login or their 4-digit PIN).
+    Cashier discounts above **10%** need a manager PIN. Coupons do not need approval.
+15. **KOT**: "Send KOT" puts all not-yet-sent items on a new numbered KOT; adding items later creates KOT #2, #3…
+    Items already sent can only be cancelled (with reason, by cashier/manager), not edited.
+16. **Order numbers** restart every day per branch; **token numbers** (QSR/café/food truck) also restart daily.
+17. **Merge tables**: items of table A's order move into table B's order; A is marked "merged" and freed when B is settled.
+18. **Offline-safe order creation**: every order sent by POS carries a `clientId`; sending the same one again returns the
+    existing order (no duplicates). This is reused by offline sync in Phase 12.
+19. **GST on charges**: service, packing and delivery charges are taxed at the same rate(s) as the food (composite supply),
+    spread in proportion. Discount is applied before tax. CGST = SGST = half rate each, computed per tax-rate group.

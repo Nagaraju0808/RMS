@@ -1,2 +1,20 @@
 import type { PrismaClient } from "@prisma/client";
-export async function seedOperations(_p: PrismaClient, _r: string, _b1: string, _b2: string) {}
+
+/** Floor plans, coupons and (later phases) operational demo data. */
+export async function seedOperations(p: PrismaClient, rid: string, b1: string, b2: string) {
+  for (const [bid, layout] of [[b1, { AC: 6, Outdoor: 4, Rooftop: 4 }], [b2, { "Main hall": 6 }]] as const) {
+    let n = 1;
+    for (const [si, [sname, count]] of Object.entries(layout).entries()) {
+      const sec = await p.section.create({ data: { branchId: bid, name: sname, sortOrder: si } });
+      for (let i = 0; i < count; i++) {
+        await p.diningTable.create({ data: { branchId: bid, sectionId: sec.id, name: `T${n++}`, seats: i % 3 === 0 ? 6 : i % 2 ? 2 : 4, posX: 30 + (i % 4) * 200, posY: 30 + si * 300 + Math.floor(i / 4) * 140, shape: i % 3 === 0 ? "rect" : i % 2 ? "round" : "square" } });
+      }
+    }
+  }
+  await p.coupon.createMany({ data: [
+    { restaurantId: rid, code: "WELCOME10", type: "PERCENT", value: 10, minOrder: 30000, maxDiscount: 15000 },
+    { restaurantId: rid, code: "FLAT100", type: "FLAT", value: 10000, minOrder: 80000 },
+  ] });
+  const { seedLater } = await import("./seed-later");
+  await seedLater(p, rid, b1, b2);
+}

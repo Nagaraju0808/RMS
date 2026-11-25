@@ -8,7 +8,9 @@ import { seedOperations } from "./seed-ops";
 const prisma = new PrismaClient();
 
 async function main() {
-  await prisma.restaurant.deleteMany({ where: { slug: { in: ["demo", "other"] } } });
+  const old = await prisma.restaurant.findMany({ where: { slug: { in: ["demo", "other"] } }, select: { id: true } });
+  await prisma.order.deleteMany({ where: { restaurantId: { in: old.map((o) => o.id) } } });
+  await prisma.restaurant.deleteMany({ where: { id: { in: old.map((o) => o.id) } } });
   const r = await prisma.restaurant.create({
     data: { name: "Spice Garden", slug: "demo", type: "FINE_DINING", gstin: "36AABCS1234F1Z5", languages: ["en", "te", "hi"], onboarded: true },
   });

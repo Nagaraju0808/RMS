@@ -50,7 +50,7 @@ tests/unit, tests/e2e     tests
 ## Phase checklist
 - [x] Phase 0 – Project setup, database, login, roles
 - [x] Phase 1 – Restaurant/branch setup, menu (signup, onboarding wizard, settings, menu CRUD, variants, add-ons, combos, time menus, CSV/Excel import-export, demo menu)
-- [ ] Phase 2 – Tables, POS orders, KOT
+- [x] Phase 2 – Tables (drag-drop floor plan, sections, status colours, merge/move), POS, waiter phone view, hold/resume, KOT, tokens, discounts/coupons/complimentary with manager PIN
 - [ ] Phase 3 – Kitchen screen (live)
 - [ ] Phase 4 – Billing, GST, payments, printing
 - [ ] Phase 5 – QR ordering for customers
