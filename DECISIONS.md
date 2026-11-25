@@ -30,3 +30,11 @@
     spread in proportion. Discount is applied before tax. CGST = SGST = half rate each, computed per tax-rate group.
 20. **Kitchen timers** start when the KOT is created; limits come from branch settings (default orange 10 min, red 20 min).
     Tapping an item moves it one step; "undo one step" is allowed for mis-taps. Ready alerts go to all staff in the branch.
+21. **Bill numbers**: `<financial year>/<6-digit sequence per branch>` e.g. `2627/000042` (unique, ≤16 chars as GST needs).
+22. **Cash change**: only the amount actually applied to the bill is stored as a CASH payment; the change is shown to the cashier.
+23. **Card/UPI at the counter** are recorded as payments (the machine/QR is outside the app). "Online payment" uses the
+    gateway interface: mock by default; Razorpay only with `rzp_test_` keys (live keys are refused).
+24. **Printing**: browser print + raw ESC/POS download (58/80mm) + PDF. Sending ESC/POS straight to a USB/LAN printer needs
+    a small print bridge on the shop PC – listed in TODO.md.
+25. **Time zone**: server dates (day-end, tokens, reports) use `Asia/Kolkata` by default (`APP_TZ`).
+26. **Changing a billed order**: cancel (void) the unpaid bill first; the order goes back to OPEN.

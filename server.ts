@@ -1,3 +1,5 @@
+// Business dates (day-end, reports, tokens) use the restaurant time zone. Default: India.
+process.env.TZ = process.env.TZ || process.env.APP_TZ || "Asia/Kolkata";
 // Custom server: runs Next.js and Socket.IO on the same port so API routes can
 // push live updates (kitchen screen, table status, alerts).
 import { createServer } from "http";

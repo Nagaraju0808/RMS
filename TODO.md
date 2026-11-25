@@ -1,2 +1,5 @@
 # TODO / known gaps
 (Items are added here when a feature is stuck or intentionally left simple.)
+- Direct thermal printing to USB/LAN printers needs a local print bridge (e.g. QZ Tray or a tiny Node service); the app
+  already produces ESC/POS bytes at `/api/bills/<id>/escpos?width=80`.
+- Real SMS/WhatsApp/email providers (MSG91 / Gupshup / SES) – interface ready in `src/lib/services/messaging.ts`.
