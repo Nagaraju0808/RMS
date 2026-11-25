@@ -28,3 +28,5 @@
     existing order (no duplicates). This is reused by offline sync in Phase 12.
 19. **GST on charges**: service, packing and delivery charges are taxed at the same rate(s) as the food (composite supply),
     spread in proportion. Discount is applied before tax. CGST = SGST = half rate each, computed per tax-rate group.
+20. **Kitchen timers** start when the KOT is created; limits come from branch settings (default orange 10 min, red 20 min).
+    Tapping an item moves it one step; "undo one step" is allowed for mis-taps. Ready alerts go to all staff in the branch.
