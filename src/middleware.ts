@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { SESSION_COOKIE, verifySession } from "@/lib/session";
 
 // Public pages: login, customer QR menu (/t), online ordering (/o), tracking, bill links, booking.
-const PUBLIC = [/^\/login/, /^\/t\//, /^\/o\//, /^\/track\//, /^\/b\//, /^\/book\//, /^\/api\/public\//, /^\/api\/auth\/(login|pin)/, /^\/_next/, /^\/favicon/, /^\/manifest/, /^\/sw\.js/, /^\/icons?\//, /^\/offline/, /^\/api\/health/];
+const PUBLIC = [/^\/login/, /^\/t\//, /^\/o\//, /^\/track\//, /^\/b\//, /^\/book\//, /^\/api\/public\//, /^\/api\/auth\/(login|pin|signup)/, /^\/signup/, /^\/_next/, /^\/favicon/, /^\/manifest/, /^\/sw\.js/, /^\/icons?\//, /^\/offline/, /^\/api\/health/];
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;

@@ -49,7 +49,7 @@ tests/unit, tests/e2e     tests
 
 ## Phase checklist
 - [x] Phase 0 – Project setup, database, login, roles
-- [ ] Phase 1 – Restaurant/branch setup, menu
+- [x] Phase 1 – Restaurant/branch setup, menu (signup, onboarding wizard, settings, menu CRUD, variants, add-ons, combos, time menus, CSV/Excel import-export, demo menu)
 - [ ] Phase 2 – Tables, POS orders, KOT
 - [ ] Phase 3 – Kitchen screen (live)
 - [ ] Phase 4 – Billing, GST, payments, printing

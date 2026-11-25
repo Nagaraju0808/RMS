@@ -63,7 +63,8 @@ export default function LoginPage() {
           </div>
         )}
         {err && <p role="alert" className="mt-3 text-center text-sm text-red-600">{err}</p>}
-        <p className="mt-6 text-center text-xs muted">Demo: owner@demo.com / password123 · PINs 1111–6666</p>
+        <a href="/signup" className="mt-4 block text-center text-sm text-brand-600">New restaurant? Create an account</a>
+        <p className="mt-2 text-center text-xs muted">Demo: owner@demo.com / password123 · PINs 1111–6666</p>
       </Card>
     </div>
   );

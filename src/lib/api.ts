@@ -1,7 +1,7 @@
 // Helpers for API route handlers: auth + permission + tenant scope + Zod validation + errors.
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { ZodError, ZodSchema } from "zod";
+import { z, ZodError, ZodTypeAny } from "zod";
 import { SESSION_COOKIE, Session, verifySession } from "./session";
 import { can, Permission } from "./roles";
 
@@ -22,7 +22,7 @@ export function requireBranch(s: Session): string {
   if (!s.branchId) throw new ApiError(400, "Please choose a branch first.");
   return s.branchId;
 }
-export async function parseBody<T>(req: NextRequest | Request, schema: ZodSchema<T>): Promise<T> {
+export async function parseBody<S extends ZodTypeAny>(req: NextRequest | Request, schema: S): Promise<z.output<S>> {
   let json: unknown;
   try { json = await req.json(); } catch { throw new ApiError(400, "Request body must be JSON."); }
   return schema.parse(json);

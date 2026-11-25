@@ -6,6 +6,7 @@ import Link from "next/link";
 export default function Dashboard() {
   const { me } = useApp();
   if (!me) return <p className="muted">Loading…</p>;
+  if (!me.restaurant.onboarded && me.user.role === "OWNER") { if (typeof window !== "undefined") location.href = "/onboarding"; return null; }
   return (
     <div>
       <PageHeader title={`Welcome, ${me.user.name}`} />

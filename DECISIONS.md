@@ -13,3 +13,8 @@
    PIN login = restaurant code + 4-digit PIN. 5 wrong passwords lock the account for 15 minutes.
 7. **Database changes**: `prisma db push` is used during development for speed (no migration files yet).
 8. **Full schema up-front**: all tables for phases 0–12 are in `schema.prisma` from Phase 0.
+9. **Signup**: added a public `/signup` page (restaurant + owner account) that leads into the onboarding wizard (`/onboarding`).
+10. **Photos/logo upload** are saved to `public/uploads/<restaurantId>/` (swap for S3/Cloud storage in production).
+11. **Menu delete**: items that were ever sold are archived (`active=false`) instead of deleted, so reports stay correct.
+12. **Prices in CSV/Excel** are written in rupees (e.g. 249.50) for humans; stored as paise.
+13. **Channel prices**: takeaway/online price blank = dine-in price. QR (at table) uses dine-in price.
