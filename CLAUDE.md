@@ -57,7 +57,7 @@ tests/unit, tests/e2e     tests
 - [x] Phase 6 – Reservations (staff + online form, 7-day calendar, auto table pick, clash check, no-show tracking), waitlist with wait estimate + "table ready" message (mock), online ordering site /o/<slug> with pincode delivery zones, delivery assignment, rider phone view, customer tracking, aggregator interface + mock Swiggy/Zomato webhook
 - [x] Phase 7 – Inventory: ingredients (g/ml/pcs base units + kg/L conversion), recipes per dish/size, auto deduct on KOT + return on cancel, low-stock alerts, expiry (FIFO batches), wastage, stock count, suppliers, purchase orders, goods received, supplier dues, food cost %
 - [x] Phase 8 – Staff: profiles, roles, extra-permission editor, PIN/password, shifts (7-day planner), clock in/out, leave requests + approval, tip sharing by hours, monthly salary summary (Excel export), audit log screen with filters
-- [ ] Phase 9 – Customers, loyalty, feedback
+- [x] Phase 9 – Customers: auto-created from phone on paid orders, profile (visits, favourites, spend, points, feedback), loyalty earn/redeem (max 50%), tiers with multipliers, coupons, campaigns to segments (birthday/anniversary/inactive/tier) with mock sender, feedback dashboard + low-rating alerts
 - [ ] Phase 10 – Reports and dashboard
 - [ ] Phase 11 – AI features
 - [ ] Phase 12 – Offline mode, security check, testing, deployment

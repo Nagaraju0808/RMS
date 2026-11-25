@@ -508,7 +508,7 @@ model Order {
   waiterId       String?
   waiter         User?       @relation("OrderWaiter", fields: [waiterId], references: [id])
   customerId     String?
-  customer       Customer?   @relation(fields: [customerId], references: [id])
+  customer       Customer?   @relation(fields: [customerId], references: [id], onDelete: SetNull)
   customerName   String?
   customerPhone  String?
   guests         Int         @default(1)
@@ -665,7 +665,7 @@ model Reservation {
   tableId     String?
   table       DiningTable?      @relation(fields: [tableId], references: [id])
   customerId  String?
-  customer    Customer?         @relation(fields: [customerId], references: [id])
+  customer    Customer?         @relation(fields: [customerId], references: [id], onDelete: SetNull)
   name        String
   phone       String
   guests      Int
@@ -803,7 +803,7 @@ model PurchaseOrderLine {
   poId         String
   po           PurchaseOrder @relation(fields: [poId], references: [id], onDelete: Cascade)
   ingredientId String
-  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
   quantity     Float  // base unit
   received     Float  @default(0)
   unitCost     Int    // paise per base unit*100 (same as Ingredient.costPerUnit)
@@ -921,7 +921,7 @@ model Feedback {
   orderId    String?
   order      Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
   customerId String?
-  customer   Customer? @relation(fields: [customerId], references: [id])
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
   branchId   String
   rating     Int       // 1–5
   foodRating Int?

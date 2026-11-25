@@ -118,6 +118,7 @@ function OrderBilling({ orderId }: { orderId: string }) {
           {!bill ? (
             <Card className="space-y-3">
               <p>No bill yet. Items: {o.items.filter((i: any) => i.status !== "CANCELLED").length}</p>
+              <CustomerBox o={o} onChange={load} toast={toast} />
               <div className="flex flex-wrap gap-2"><Button size="lg" onClick={() => makeBill()}>Make bill</Button><Button size="lg" variant="outline" onClick={() => setSplitDlg(true)}>Split bill</Button></div>
             </Card>
           ) : (
@@ -184,4 +185,16 @@ function SplitDialog({ o, onClose, onSplit }: any) {
           <div className="flex gap-1">{Array.from({ length: parts }, (_, p) => <button key={p} onClick={() => setAssign({ ...assign, [i.id]: p })} className={`h-8 w-8 rounded ${assign[i.id] === p ? "bg-brand-600 text-white" : "border border-app"}`}>{p + 1}</button>)}</div></div>)}
         <Button className="w-full" onClick={() => { const groups = Array.from({ length: parts }, (_, p) => items.filter((i: any) => assign[i.id] === p).map((i: any) => i.id)).filter((g) => g.length); onSplit({ mode: "items", groups, labels: groups.map((_, k) => `Person ${k + 1}`) }); }}>Make separate bills</Button></div>}
   </Dialog>;
+}
+
+function CustomerBox({ o, onChange, toast }: any) {
+  const [phone, setPhone] = React.useState(o.customerPhone || "");
+  const [c, setC] = React.useState<any>(null);
+  const find = () => api(`/api/orders/${o.id}/customer`, { body: { phone } }).then((r) => { setC(r.customer); onChange(); }).catch((e) => toast(e.message, "err"));
+  React.useEffect(() => { if (o.customerPhone && !c) find(); }, []); // eslint-disable-line
+  return <div className="rounded-lg border border-app p-3">
+    <div className="flex gap-2"><Input placeholder="Customer phone (for loyalty points)" value={phone} onChange={(e) => setPhone(e.target.value)} /><Button variant="outline" onClick={find}>Find</Button></div>
+    {c && <div className="mt-2 flex flex-wrap items-center gap-2 text-sm"><span><b>{c.name || c.phone}</b> · {c.points} points · {c.visits} visits</span>
+      {c.points > 0 && !o.discountType && <Button size="sm" onClick={() => { const p = prompt(`How many points to use? (has ${c.points})`, String(c.points)); if (p) api(`/api/customers/${c.id}/redeem`, { body: { orderId: o.id, points: Number(p) } }).then(() => { toast("Points used"); find(); }).catch((e) => toast(e.message, "err")); }}>Use points</Button>}</div>}
+  </div>;
 }

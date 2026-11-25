@@ -2,6 +2,7 @@ import type { PrismaClient, Unit } from "@prisma/client";
 // Demo data for later phases: inventory (7), staff (8), customers (9), sales history (10).
 export async function seedLater(p: PrismaClient, rid: string, b1: string, b2: string) {
   await seedInventory(p, rid, b1, b2);
+  await p.membershipTier.createMany({ data: [{ restaurantId: rid, name: "Silver", minSpend: 500000, earnMultiplier: 1 }, { restaurantId: rid, name: "Gold", minSpend: 2000000, earnMultiplier: 1.5 }, { restaurantId: rid, name: "Platinum", minSpend: 5000000, earnMultiplier: 2 }] });
   const mod = await import("./seed-history").catch(() => null);
   if (mod) await mod.seedHistory(p, rid, b1, b2);
 }

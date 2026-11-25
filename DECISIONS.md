@@ -66,3 +66,8 @@
 39. **Salary** (simple, as asked): monthly staff = salary × (days present + approved leave days) ÷ 26 (max 100%);
     hourly staff = hours × rate. Tips added on top. A forgotten clock-out counts as max 14 hours.
 40. **Tips** recorded on payments are shared per day by hours worked, once per day.
+41. **Customers** are created/linked automatically when an order with a phone number is fully paid (phone normalised to
+    10 digits). Points are earned on the amount paid (default 5 points per ₹100; 1 point = ₹1) × tier multiplier.
+42. **Redeeming points** turns them into a flat discount on the order before the bill is made, max 50% of the order.
+43. **Low ratings (≤2★)** show a live alert to managers and send a WhatsApp (mock) to the owner/branch managers who have a phone.
+44. Schema tweak: customer links on orders/reservations/feedback use `onDelete: SetNull`; PO lines cascade with ingredients.
