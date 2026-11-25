@@ -19,3 +19,6 @@ body { background: var(--bg); color: var(--fg); }
   .no-print { display: none !important; }
   body { background: white; color: black; }
 }
+/* Chart colours – validated for colour-blind separation in light and dark (dataviz validator). */
+:root { --chart-1: #ea580c; --chart-2: #2563eb; --chart-grid: #e2e8f0; }
+.dark { --chart-1: #ea580c; --chart-2: #3b82f6; --chart-grid: #1f2937; }

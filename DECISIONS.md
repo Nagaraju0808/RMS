@@ -71,3 +71,10 @@
 42. **Redeeming points** turns them into a flat discount on the order before the bill is made, max 50% of the order.
 43. **Low ratings (≤2★)** show a live alert to managers and send a WhatsApp (mock) to the owner/branch managers who have a phone.
 44. Schema tweak: customer links on orders/reservations/feedback use `onDelete: SetNull`; PO lines cascade with ingredients.
+45. **Reports** are computed live with SQL (no separate data warehouse). Each report returns {title, columns, rows} so the
+    screen, Excel (exceljs) and PDF (pdfkit) exports always match. Sales are counted by bill date; item reports use PAID orders.
+46. **Charts** are small hand-written SVG components (no chart library). Colours were checked with the colour-blind
+    validator: orange #ea580c + blue #2563eb (dark mode #3b82f6); "last week" is also dashed so it never relies on colour.
+47. **Staff screens render on the client only** (data loads after mount) to avoid server/browser time-zone mismatches.
+48. **Demo history**: the seed adds ~60 days of past orders (≈3,100) so reports and forecasts have data. Bigger:
+    `SEED_DAYS=120 SEED_ORDERS_PER_DAY=60 npm run db:seed`.

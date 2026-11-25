@@ -58,7 +58,7 @@ tests/unit, tests/e2e     tests
 - [x] Phase 7 – Inventory: ingredients (g/ml/pcs base units + kg/L conversion), recipes per dish/size, auto deduct on KOT + return on cancel, low-stock alerts, expiry (FIFO batches), wastage, stock count, suppliers, purchase orders, goods received, supplier dues, food cost %
 - [x] Phase 8 – Staff: profiles, roles, extra-permission editor, PIN/password, shifts (7-day planner), clock in/out, leave requests + approval, tip sharing by hours, monthly salary summary (Excel export), audit log screen with filters
 - [x] Phase 9 – Customers: auto-created from phone on paid orders, profile (visits, favourites, spend, points, feedback), loyalty earn/redeem (max 50%), tiers with multipliers, coupons, campaigns to segments (birthday/anniversary/inactive/tier) with mock sender, feedback dashboard + low-rating alerts
-- [ ] Phase 10 – Reports and dashboard
+- [x] Phase 10 – Live dashboard (today vs last week, hourly chart, top items, occupancy) + 12 reports (sales, item, category, busy hours, payment modes, discounts, cancellations, GST, staff, inventory/waste, profit per dish, branches) with date & branch filters, chart/table views, Excel + PDF export; 60-day demo history
 - [ ] Phase 11 – AI features
 - [ ] Phase 12 – Offline mode, security check, testing, deployment
 

@@ -77,6 +77,10 @@ function Sidebar({ open, setOpen }: { open: boolean; setOpen: (b: boolean) => vo
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);
+  // Staff screens are client-rendered (data loads after mount) – avoids server/browser time-zone mismatches.
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
+  if (!mounted) return <div className="p-6 muted">Loading…</div>;
   return (
     <AppProvider>
       <div className="flex min-h-screen">

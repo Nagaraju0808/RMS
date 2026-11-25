@@ -5,10 +5,12 @@ import { Button, Card, Input, Label, Select, Textarea } from "@/components/ui";
 import { api } from "@/lib/client";
 export default function Book({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
   const [r, setR] = React.useState<any>(null); const [done, setDone] = React.useState<any>(null); const [err, setErr] = React.useState("");
   React.useEffect(() => { api(`/api/public/book/${slug}`).then(setR).catch((e) => setErr(e.message)); }, [slug]);
   if (done) return <div className="p-8 text-center"><h1 className="text-2xl font-bold">Booked! ✓</h1><p>See you on {new Date(done.dateTime).toLocaleString("en-IN")}.</p></div>;
-  if (!r) return <p className="p-6">{err || "Loading…"}</p>;
+  if (!r || !mounted) return <p className="p-6">{err || "Loading…"}</p>;
   const tomorrow = new Date(Date.now() + 86400_000).toLocaleDateString("en-CA");
   return <div className="mx-auto max-w-md p-4"><Card>
     <h1 className="mb-1 text-xl font-bold">Book a table at {r.name}</h1>
