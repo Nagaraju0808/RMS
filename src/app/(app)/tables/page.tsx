@@ -41,6 +41,7 @@ export default function TablesPage() {
   return (
     <div>
       <PageHeader title="Tables">
+        {canEdit && <a href="/tables/qr"><Button variant="outline">QR codes</Button></a>}
         {canEdit && <Button variant={editMode ? "default" : "outline"} onClick={() => setEditMode(!editMode)}>{editMode ? "Done editing" : "Edit floor plan"}</Button>}
       </PageHeader>
       <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -78,7 +79,7 @@ export default function TablesPage() {
           <div className="grid grid-cols-3 gap-2">{data.tables.filter((t: any) => t.id !== sel.id).map((t: any) => <Button key={t.id} variant="outline" onClick={() => run(api("/api/tables/merge", { body: { fromTableId: sel.id, toTableId: t.id } }), `Merged into ${t.name}`)}>{t.name}</Button>)}</div>
         </div> : <div className="space-y-2">
           <p><Badge>{sel.status}</Badge> {sel.orders[0] && <>Order #{sel.orders[0].orderNo} · {rs(total(sel))}</>}</p>
-          {sel.requests.map((r: any) => <p key={r.id} className="text-red-600">{r.type === "CALL_WAITER" ? "🙋 Customer is calling a waiter" : "🧾 Customer asked for the bill"} <button className="underline" onClick={() => run(api(`/api/public/requests/${r.id}/resolve`, { method: "POST" }), "Done")}>done</button></p>)}
+          {sel.requests.map((r: any) => <p key={r.id} className="text-red-600">{r.type === "CALL_WAITER" ? "🙋 Customer is calling a waiter" : "🧾 Customer asked for the bill"} <button className="underline" onClick={() => run(api(`/api/table-requests/${r.id}`, { method: "POST" }), "Done")}>done</button></p>)}
           <Button className="w-full" size="lg" onClick={() => router.push(`/pos?table=${sel.id}`)}>{sel.orders.length ? "Open order" : "New order"}</Button>
           {sel.orders[0] && <Button className="w-full" variant="success" onClick={() => router.push(`/billing?order=${sel.orders[0].id}`)}>Bill / Pay</Button>}
           <div className="grid grid-cols-2 gap-2">

@@ -38,3 +38,10 @@
     a small print bridge on the shop PC – listed in TODO.md.
 25. **Time zone**: server dates (day-end, tokens, reports) use `Asia/Kolkata` by default (`APP_TZ`).
 26. **Changing a billed order**: cancel (void) the unpaid bill first; the order goes back to OPEN.
+27. **QR orders**: with auto-accept ON they are added to the table's open order and go to the kitchen at once.
+    With auto-accept OFF (default) each customer order waits as "QR approval"; accepting merges it into the table's
+    open order and sends the KOT. The customer's phone shows items of the table's current orders (anyone at the table
+    can see them – the QR is the table's key). Paid orders disappear from the phone 30 min after payment.
+28. **Customer languages**: English, Telugu, Hindi for buttons; dish/category names come from the `nameI18n` fields
+    (fill them in the menu editor). Missing translation → English name.
+29. **Public endpoints** (`/api/public/*`) are rate-limited per IP and only return safe fields (no cost prices).
