@@ -56,7 +56,7 @@ tests/unit, tests/e2e     tests
 - [x] Phase 5 – QR ordering: per-table QR sheet, public menu (en/te/hi), cart, auto-accept or waiter approval, call waiter / ask bill alerts, live status, pay from phone (mock/Razorpay test), rating
 - [x] Phase 6 – Reservations (staff + online form, 7-day calendar, auto table pick, clash check, no-show tracking), waitlist with wait estimate + "table ready" message (mock), online ordering site /o/<slug> with pincode delivery zones, delivery assignment, rider phone view, customer tracking, aggregator interface + mock Swiggy/Zomato webhook
 - [x] Phase 7 – Inventory: ingredients (g/ml/pcs base units + kg/L conversion), recipes per dish/size, auto deduct on KOT + return on cancel, low-stock alerts, expiry (FIFO batches), wastage, stock count, suppliers, purchase orders, goods received, supplier dues, food cost %
-- [ ] Phase 8 – Staff, attendance, audit log
+- [x] Phase 8 – Staff: profiles, roles, extra-permission editor, PIN/password, shifts (7-day planner), clock in/out, leave requests + approval, tip sharing by hours, monthly salary summary (Excel export), audit log screen with filters
 - [ ] Phase 9 – Customers, loyalty, feedback
 - [ ] Phase 10 – Reports and dashboard
 - [ ] Phase 11 – AI features

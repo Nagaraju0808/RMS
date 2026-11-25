@@ -60,3 +60,9 @@
 35. **Food cost**: from the recipe when one exists, otherwise from the item's manual "cost price" estimate.
 36. **Integration tests** use a separate database `dineflow_test` (`npm run test:integration`). Prisma refuses
     `--force-reset` from an AI agent, so the test setup does a normal `db push` and the seed wipes/re-creates demo data.
+37. **Permissions editor** adds EXTRA permissions on top of the role (stored in `User.permissions`); role defaults
+    cannot be removed per person. Managers can only add/edit CASHIER/WAITER/CHEF/DELIVERY staff of their own branch.
+38. **PINs are unique per restaurant** (checked against bcrypt hashes when saving).
+39. **Salary** (simple, as asked): monthly staff = salary × (days present + approved leave days) ÷ 26 (max 100%);
+    hourly staff = hours × rate. Tips added on top. A forgotten clock-out counts as max 14 hours.
+40. **Tips** recorded on payments are shared per day by hours worked, once per day.
