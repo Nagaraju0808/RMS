@@ -45,3 +45,10 @@
 28. **Customer languages**: English, Telugu, Hindi for buttons; dish/category names come from the `nameI18n` fields
     (fill them in the menu editor). Missing translation → English name.
 29. **Public endpoints** (`/api/public/*`) are rate-limited per IP and only return safe fields (no cost prices).
+30. **Online orders** (own website) are accepted automatically, go to the kitchen at once and get a bill straight away;
+    the customer can pay online (gateway) or cash on delivery/pickup. Delivery charge comes from the pincode zone.
+31. **Reservations** block a table for 2 × "average table time" (default 90 min). No table chosen → smallest free table that fits.
+    No-shows are counted per phone number and shown next to future bookings.
+32. **Aggregators**: `src/lib/services/aggregators.ts` defines the interface; Swiggy/Zomato are MOCKS. Webhook:
+    `POST /api/public/aggregator/<SWIGGY|ZOMATO>?branch=<id>` with header `x-aggregator-secret` (env `AGGREGATOR_SECRET`).
+    Aggregator orders are type ONLINE (platform rider picks up). Items are matched by our item id or exact name.

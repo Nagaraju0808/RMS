@@ -17,7 +17,7 @@ export const LineSchema = z.object({
 });
 export type LineIn = z.infer<typeof LineSchema>;
 
-export const ORDER_INCLUDE = { items: { orderBy: { createdAt: "asc" } }, table: true, kots: { orderBy: { kotNo: "asc" } }, bills: { include: { payments: true } } } satisfies Prisma.OrderInclude;
+export const ORDER_INCLUDE = { items: { orderBy: { createdAt: "asc" } }, table: true, kots: { orderBy: { kotNo: "asc" } }, bills: { include: { payments: true } }, delivery: { include: { rider: { select: { id: true, name: true, phone: true } } } } } satisfies Prisma.OrderInclude;
 
 /** Turn client line requests into priced OrderItem rows. Prices ALWAYS come from the database. */
 export async function resolveLines(restaurantId: string, channel: "DINE_IN" | "TAKEAWAY" | "DELIVERY" | "ONLINE" | "QR", lines: LineIn[], opts: { allowUnavailable?: boolean } = {}) {
@@ -66,6 +66,7 @@ export const CreateOrderSchema = z.object({
   guests: z.number().int().min(1).max(50).default(1), notes: z.string().max(300).optional(), items: z.array(LineSchema).default([]),
   send: z.boolean().default(false), hold: z.boolean().default(false), clientId: z.string().max(64).optional(),
   deliveryAddress: z.string().max(300).optional(), source: z.string().max(20).optional(), status: z.enum(["OPEN", "PENDING_APPROVAL"]).optional(),
+  deliveryCharge: z.number().int().min(0).max(100000).optional(), deliveryZoneId: z.string().optional(), externalId: z.string().max(64).optional(),
 });
 type CreateIn = z.infer<typeof CreateOrderSchema>;
 
@@ -97,7 +98,8 @@ export async function createOrder(s: Pick<Session, "restaurantId" | "branchId" |
       data: {
         restaurantId: s.restaurantId, branchId: branch.id, orderNo, tokenNo, type: d.type, tableId: d.tableId ?? null, waiterId: s.sub || null,
         customerName: d.customerName, customerPhone: d.customerPhone, guests: d.guests, notes: d.notes, clientId: d.clientId, deliveryAddress: d.deliveryAddress,
-        source: d.source ?? "POS", status: d.status ?? (d.hold ? "HELD" : "OPEN"),
+        source: d.source ?? "POS", status: d.status ?? (d.hold ? "HELD" : "OPEN"), deliveryCharge: d.deliveryCharge ?? 0, deliveryZoneId: d.deliveryZoneId, externalId: d.externalId,
+        ...(d.type === "DELIVERY" ? { delivery: { create: { history: [{ status: "PENDING", at: new Date().toISOString() }] } } } : {}),
         packingCharge: d.type === "DINE_IN" || d.type === "QR" ? 0 : (branch.settings as any)?.packingChargePerItem * lines.reduce((n, l) => n + l.quantity, 0) || 0,
         items: { create: lines.map((l) => ({ ...l, addons: l.addons as any })) },
       },
