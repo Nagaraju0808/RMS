@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "NODE_ENV=production tsx server.ts",
     "test": "vitest run",
+    "test:integration": "vitest run -c vitest.integration.config.ts",
     "test:e2e": "playwright test --trace off",
     "typecheck": "tsc --noEmit",
     "db:push": "prisma db push",

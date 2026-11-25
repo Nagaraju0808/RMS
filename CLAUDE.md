@@ -43,7 +43,7 @@ tests/unit, tests/e2e     tests
 - Start DB: `service postgresql start` (or `docker compose up -d db`)
 - Create tables: `npx prisma db push` · Seed demo: `npm run db:seed` · Reset: `npm run db:reset`
 - Run app: `npm run dev` → http://localhost:3000
-- Unit tests: `npm test` · Type check: `npm run typecheck` · E2E: `npm run test:e2e`
+- Unit tests: `npm test` · DB integration tests: `npm run test:integration` (uses database dineflow_test) · Type check: `npm run typecheck` · E2E: `npm run test:e2e`
 - Demo logins: owner@demo.com / manager@ / cashier@ / waiter@ / chef@ / rider@ — password `password123`.
   PINs (restaurant code `demo`): owner 1111, manager 2222, cashier 3333, waiter 4444, chef 5555, rider 6666.
 
@@ -55,7 +55,7 @@ tests/unit, tests/e2e     tests
 - [x] Phase 4 – Billing: GST (CGST/SGST/IGST per rate), service/packing charge, round-off, split (equal/items/person), merge bills, split payments, Razorpay test + mock gateway, ESC/POS 58/80mm, PDF, share link (mock), refunds, void, day-end cash closing
 - [x] Phase 5 – QR ordering: per-table QR sheet, public menu (en/te/hi), cart, auto-accept or waiter approval, call waiter / ask bill alerts, live status, pay from phone (mock/Razorpay test), rating
 - [x] Phase 6 – Reservations (staff + online form, 7-day calendar, auto table pick, clash check, no-show tracking), waitlist with wait estimate + "table ready" message (mock), online ordering site /o/<slug> with pincode delivery zones, delivery assignment, rider phone view, customer tracking, aggregator interface + mock Swiggy/Zomato webhook
-- [ ] Phase 7 – Inventory, recipes, suppliers
+- [x] Phase 7 – Inventory: ingredients (g/ml/pcs base units + kg/L conversion), recipes per dish/size, auto deduct on KOT + return on cancel, low-stock alerts, expiry (FIFO batches), wastage, stock count, suppliers, purchase orders, goods received, supplier dues, food cost %
 - [ ] Phase 8 – Staff, attendance, audit log
 - [ ] Phase 9 – Customers, loyalty, feedback
 - [ ] Phase 10 – Reports and dashboard

@@ -52,3 +52,11 @@
 32. **Aggregators**: `src/lib/services/aggregators.ts` defines the interface; Swiggy/Zomato are MOCKS. Webhook:
     `POST /api/public/aggregator/<SWIGGY|ZOMATO>?branch=<id>` with header `x-aggregator-secret` (env `AGGREGATOR_SECRET`).
     Aggregator orders are type ONLINE (platform rider picks up). Items are matched by our item id or exact name.
+33. **Stock units**: every ingredient has a base unit g / ml / pcs. Recipes and purchases may use kg / L too (converted).
+    Ingredient cost is entered per kg / per litre / per piece. Stock can go negative (the kitchen never stops a sale);
+    the low-stock alert tells the manager.
+34. **When stock moves**: deducted when the item is SENT TO THE KITCHEN (KOT), not when billed; returned once if the item
+    or order is cancelled. Recipe lines can be for one size (Half/Full) or for all sizes.
+35. **Food cost**: from the recipe when one exists, otherwise from the item's manual "cost price" estimate.
+36. **Integration tests** use a separate database `dineflow_test` (`npm run test:integration`). Prisma refuses
+    `--force-reset` from an AI agent, so the test setup does a normal `db push` and the seed wipes/re-creates demo data.
