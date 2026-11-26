@@ -59,7 +59,7 @@ tests/unit, tests/e2e     tests
 - [x] Phase 8 – Staff: profiles, roles, extra-permission editor, PIN/password, shifts (7-day planner), clock in/out, leave requests + approval, tip sharing by hours, monthly salary summary (Excel export), audit log screen with filters
 - [x] Phase 9 – Customers: auto-created from phone on paid orders, profile (visits, favourites, spend, points, feedback), loyalty earn/redeem (max 50%), tiers with multipliers, coupons, campaigns to segments (birthday/anniversary/inactive/tier) with mock sender, feedback dashboard + low-rating alerts
 - [x] Phase 10 – Live dashboard (today vs last week, hourly chart, top items, occupancy) + 12 reports (sales, item, category, busy hours, payment modes, discounts, cancellations, GST, staff, inventory/waste, profit per dish, branches) with date & branch filters, chart/table views, Excel + PDF export; 60-day demo history
-- [ ] Phase 11 – AI features
+- [x] Phase 11 – Smart features behind one AI service (`src/lib/services/ai.ts`, OFF by default with rule-based fallbacks): 7-day item forecast, purchase suggestion from forecast+recipes+stock, menu engineering (Star/Plowhorse/Puzzle/Dog), review summary, "often ordered together" upsell on POS + QR menu, voice order taking with confirm step
 - [ ] Phase 12 – Offline mode, security check, testing, deployment
 
 See `DECISIONS.md` for choices made while building, `TODO.md` for known gaps.

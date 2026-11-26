@@ -78,3 +78,11 @@
 47. **Staff screens render on the client only** (data loads after mount) to avoid server/browser time-zone mismatches.
 48. **Demo history**: the seed adds ~60 days of past orders (≈3,100) so reports and forecasts have data. Bigger:
     `SEED_DAYS=120 SEED_ORDERS_PER_DAY=60 npm run db:seed`.
+49. **AI is optional and OFF by default** (`AI_PROVIDER=off`). Every smart feature works on plain statistics:
+    forecast = same-weekday average of the last 4 weeks × recent trend (capped ±30%); purchase = forecast use from recipes
+    + 20% safety − stock; menu classes from popularity vs profit; reviews = keyword themes; upsell = items bought together;
+    voice = word matching. With `AI_PROVIDER=anthropic` + `ANTHROPIC_API_KEY`, Claude (official `@anthropic-ai/sdk`,
+    model `claude-opus-5-5`, low effort, server-side refusal fallback) only writes the plain-English explanations and
+    review bullet points. If the AI call fails, the rule-based text is shown.
+50. **Voice ordering** uses the browser's speech recognition (en-IN); browsers without it get a typed box. The parsed
+    items are shown for the waiter to confirm, then added to the cart – nothing is sent to the kitchen automatically.

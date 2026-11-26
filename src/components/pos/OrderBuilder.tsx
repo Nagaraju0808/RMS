@@ -29,6 +29,8 @@ export function OrderBuilder({ mode = "pos", initialOrderId, initialTableId, onD
   const [busy, setBusy] = React.useState(false);
   const [showCart, setShowCart] = React.useState(false);
   const [upsell, setUpsell] = React.useState<any[]>([]);
+  const [voice, setVoice] = React.useState<null | { text: string; items: any[]; unknown: string[] }>(null);
+  const [listening, setListening] = React.useState(false);
   const { toast, node } = useToast();
   const searchRef = React.useRef<HTMLInputElement>(null);
   const features = me?.features || {};
@@ -101,6 +103,18 @@ export function OrderBuilder({ mode = "pos", initialOrderId, initialTableId, onD
       onDone?.();
     } catch (e: any) { toast(e.message, "err"); } finally { setBusy(false); }
   }
+  async function parseVoice(text: string) {
+    try { const r = await api("/api/smart/voice", { body: { text } }); setVoice({ text, ...r }); } catch (e: any) { toast(e.message, "err"); }
+  }
+  function startVoice() {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) { const t = prompt("Voice is not supported on this browser. Type the order (e.g. two butter naan and one paneer tikka half):"); if (t) parseVoice(t); return; }
+    const rec = new SR(); rec.lang = "en-IN"; rec.interimResults = false;
+    rec.onresult = (e: any) => parseVoice(e.results[0][0].transcript);
+    rec.onerror = () => toast("Could not hear clearly. Try again.", "err");
+    rec.onend = () => setListening(false);
+    setListening(true); rec.start();
+  }
   function newOrder() { setOrder(null); setPending([]); setCust({ customerName: "", customerPhone: "", guests: 2, notes: "", deliveryAddress: "" }); if (!initialTableId) setTableId(""); }
   async function act(url: string, body: any, msg: string) {
     try { const o = await api(url, { body }); setOrder(o); toast(msg); setDialog(null); return o; } catch (e: any) { toast(e.message, "err"); }
@@ -111,6 +125,7 @@ export function OrderBuilder({ mode = "pos", initialOrderId, initialTableId, onD
   const menuPane = (
     <div className="flex min-w-0 flex-1 flex-col">
       <div className="mb-2 flex gap-2">
+        <Button variant="outline" aria-label="Voice order" title="Speak the order" onClick={() => startVoice()} disabled={listening}>{listening ? "Listening…" : "🎤 Voice"}</Button>
         <Input ref={searchRef} placeholder="Search item or code  ( / )" value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && visible[0]) { add(visible[0]); setQ(""); } }} />
       </div>
       <div className="mb-2 flex gap-1 overflow-x-auto pb-1">
@@ -206,6 +221,13 @@ export function OrderBuilder({ mode = "pos", initialOrderId, initialTableId, onD
     <div className={cn("flex gap-3", mode === "pos" ? "flex-col md:flex-row" : "flex-col")}>
       {mode === "waiter" ? (showCart ? cartPane : menuPane) : <>{menuPane}{cartPane}</>}
       {mode === "waiter" && <div className="sticky bottom-2 z-10"><Button size="lg" className="w-full" onClick={() => setShowCart(!showCart)}>{showCart ? "← Back to menu" : `View order (${pending.reduce((n, l) => n + l.quantity, 0)} new) · ${rs(preview.total)}`}</Button></div>}
+      {voice && <Dialog open onClose={() => setVoice(null)} title="Check the voice order">
+        <p className="mb-2 text-sm muted">Heard: “{voice.text}”</p>
+        {voice.items.map((l, i) => <div key={i} className="flex justify-between border-b border-app py-1"><span>{l.quantity} × {l.name}</span><button className="text-red-600" aria-label="remove" onClick={() => setVoice({ ...voice, items: voice.items.filter((_, j) => j !== i) })}>✕</button></div>)}
+        {voice.unknown.length > 0 && <p className="mt-2 text-sm text-red-600">Not understood: {voice.unknown.join(", ")}</p>}
+        <div className="mt-3 flex gap-2"><Button variant="outline" onClick={() => { setVoice(null); startVoice(); }}>Speak again</Button>
+          <Button className="flex-1" disabled={!voice.items.length} onClick={() => { setPending((p) => [...p, ...voice.items.map((l) => { const it = menu.items.find((x: any) => x.id === l.menuItemId); const v = it?.variants.find((x: any) => x.id === l.variantId); return { key: Math.random().toString(36).slice(2), menuItemId: l.menuItemId, variantId: l.variantId ?? (it?.variants[0]?.id ?? null), addonIds: [], quantity: l.quantity, name: l.name, unitPrice: priceFor(v ?? it?.variants[0] ?? it, type), taxPercent: it?.taxPercent ?? 5 }; })]); setVoice(null); toast("Added – check and press Send KOT"); }}>Add to order</Button></div>
+      </Dialog>}
       {picking && <ItemPicker item={picking} menu={menu} channel={type} onAdd={(l) => setPending((p) => [...p, l])} onClose={() => setPicking(null)} />}
       {dialog === "held" && <Dialog open onClose={() => setDialog(null)} title="Held orders">
         {held.length === 0 && <p className="muted">No held orders.</p>}
