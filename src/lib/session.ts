@@ -10,8 +10,14 @@ export type Session = {
   branchId: string | null;
   perms: string[];
 };
+const DEV_SECRET = "dev-secret-change-me-please-32chars-min";
 function secret() {
-  return new TextEncoder().encode(process.env.JWT_SECRET || "dev-secret-change-me-please-32chars-min");
+  const v = process.env.JWT_SECRET || DEV_SECRET;
+  // Never run production with the development secret or a short one.
+  if (process.env.NODE_ENV === "production" && (v === DEV_SECRET || v.length < 32 || /change-me/.test(v))) {
+    throw new Error("JWT_SECRET must be set to a random value of at least 32 characters in production.");
+  }
+  return new TextEncoder().encode(v);
 }
 export async function signSession(s: Session): Promise<string> {
   return new SignJWT({ ...s }).setProtectedHeader({ alg: "HS256" }).setIssuedAt().setExpirationTime("12h").sign(secret());

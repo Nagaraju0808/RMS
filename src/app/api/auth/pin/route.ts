@@ -12,6 +12,7 @@ const Body = z.object({ restaurant: z.string().min(1), pin: z.string().regex(/^\
 export const POST = handler(async (req: NextRequest) => {
   if (!rateLimit(`pin:${clientIp(req)}`, 10, 60_000)) throw new ApiError(429, "Too many attempts. Wait a minute.");
   const { restaurant, pin } = await parseBody(req, Body);
+  if (!rateLimit(`pin-r:${restaurant.toLowerCase()}`, 30, 60_000)) throw new ApiError(429, "Too many PIN attempts for this restaurant. Wait a minute.");
   const r = await prisma.restaurant.findUnique({ where: { slug: restaurant.toLowerCase() } });
   if (!r) throw new ApiError(401, "Wrong restaurant code or PIN.");
   const users = await prisma.user.findMany({ where: { restaurantId: r.id, active: true, pinHash: { not: null } } });
