@@ -1,0 +1,22 @@
+import { test } from "@playwright/test";
+import { login, expect } from "./helpers";
+test("customer orders from table QR, waiter approves, kitchen gets it", async ({ browser }) => {
+  const staff = await browser.newPage(); await login(staff, "manager@demo.com");
+  const qr = await (await staff.request.get("/api/tables/qr")).json();
+  const t = qr.find((x: any) => x.name === "T9");
+  const cust = await browser.newPage({ viewport: { width: 390, height: 800 } });
+  await cust.goto(new URL(t.url).pathname);
+  await cust.getByLabel("Language").selectOption("te");
+  await expect(cust.getByText("మసాలా దోశ")).toBeVisible();
+  await cust.getByLabel("Add Butter Naan").click();
+  await cust.getByLabel("Add Butter Naan").click();
+  await cust.getByRole("button", { name: /మీ ఆర్డర్ \(2\)/ }).click();
+  await cust.getByRole("button", { name: "ఆర్డర్ చేయండి" }).click();
+  await expect(cust.getByText(/సిబ్బంది నిర్ధారణ/)).toBeVisible();
+  await staff.goto("/orders");
+  await staff.getByRole("tab", { name: "QR approval" }).click();
+  await staff.getByRole("button", { name: "Accept" }).first().click();
+  await expect(cust.getByText("అందింది").first()).toBeVisible({ timeout: 15000 });
+  await cust.getByRole("button", { name: /వెయిటర్‌ను పిలవండి/ }).click();
+  await expect(staff.getByRole("alert").filter({ hasText: "calling a waiter" })).toBeVisible({ timeout: 10000 });
+});

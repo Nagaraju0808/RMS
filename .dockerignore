@@ -1,0 +1,10 @@
+node_modules
+.next
+.git
+.env
+test-results
+playwright-report
+.taste-skill
+backups
+public/uploads
+.next-dev

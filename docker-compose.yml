@@ -1,0 +1,37 @@
+# Local development:  docker compose up -d db
+# Full stack:         JWT_SECRET=... docker compose --profile app up -d --build
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: dineflow
+    ports: ["127.0.0.1:5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      retries: 5
+  app:
+    build: .
+    profiles: ["app"]
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/dineflow
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET to a long random value (openssl rand -hex 32)}
+      PUBLIC_URL: ${PUBLIC_URL:-http://localhost:3000}
+      PAYMENT_GATEWAY: ${PAYMENT_GATEWAY:-mock}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-}
+      AI_PROVIDER: ${AI_PROVIDER:-off}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      AGGREGATOR_SECRET: ${AGGREGATOR_SECRET:-}
+    ports: ["3000:3000"]
+    volumes: [uploads:/app/public/uploads]
+    depends_on:
+      db: { condition: service_healthy }
+volumes:
+  pgdata:
+  uploads:

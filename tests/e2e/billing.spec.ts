@@ -1,0 +1,21 @@
+import { test } from "@playwright/test";
+import { login, expect } from "./helpers";
+test("cashier bills an order and takes split payment", async ({ page }) => {
+  await login(page, "cashier@demo.com");
+  await page.goto("/pos");
+  await page.getByRole("button", { name: "TAKEAWAY" }).click();
+  await page.getByRole("button", { name: /Hakka Noodles/ }).click();
+  await page.getByRole("button", { name: "Send KOT" }).click();
+  await expect(page.getByText(/KOT sent/)).toBeVisible();
+  await page.getByRole("button", { name: "Bill / Pay" }).click();
+  await page.getByRole("button", { name: "Make bill" }).click();
+  await expect(page.getByTestId("receipt")).toContainText("TAX INVOICE");
+  await expect(page.getByTestId("receipt")).toContainText("CGST 2.5%");
+  await page.getByRole("button", { name: "+ Split payment" }).click();
+  const amounts = page.getByLabel("Amount");
+  const due = Number((await amounts.first().inputValue()));
+  await amounts.first().fill(String(due - 50));
+  await amounts.nth(1).fill("50");
+  await page.getByRole("button", { name: "Take payment" }).click();
+  await expect(page.getByText("Paid in full")).toBeVisible();
+});

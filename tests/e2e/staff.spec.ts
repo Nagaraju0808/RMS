@@ -1,0 +1,24 @@
+import { test } from "@playwright/test";
+import { login, expect } from "./helpers";
+test("owner adds a staff member, it shows in audit log; staff clocks in", async ({ page, browser }) => {
+  await login(page, "owner@demo.com");
+  await page.goto("/staff");
+  await page.getByRole("button", { name: "+ Add staff" }).click();
+  const name = "E2E Cook " + Date.now();
+  await page.fill("#sname", name);
+  await page.getByRole("dialog").locator("select").first().selectOption("CHEF");
+  const pin = String(1000 + Math.floor(Math.random() * 8999)).replace(/^(1111|2222|3333|4444|5555|6666|7878|9999)$/, "8181");
+  await page.fill("#spin", pin);
+  await page.getByRole("button", { name: "Save" }).click();
+  await expect(page.getByText(name)).toBeVisible();
+  await page.goto("/audit");
+  await page.getByLabel("Action").selectOption("STAFF_CREATE");
+  await expect(page.locator("code").filter({ hasText: name })).toBeVisible();
+  const cook = await browser.newPage();
+  await cook.goto("/login"); await cook.click("text=Staff PIN");
+  for (const d of pin) await cook.getByRole("button", { name: d, exact: true }).click();
+  await cook.waitForURL("**/kitchen");
+  await cook.goto("/me");
+  await cook.getByRole("button", { name: "Clock in" }).click();
+  await expect(cook.getByText("You are on duty")).toBeVisible();
+});

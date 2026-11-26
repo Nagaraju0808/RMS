@@ -1,0 +1,67 @@
+# DineFlow – project memory for Claude Code
+
+## Goal
+A complete restaurant management app that works for ANY type of restaurant (fine dining, QSR,
+café, cloud kitchen, bar, food truck, multi-branch chains). Full plan: `RESTAURANT_APP_PLAN.md`.
+
+## Tech stack
+- Next.js 15 (App Router) + React 19 + TypeScript + Tailwind CSS 4 + small shadcn-style UI kit (`src/components/ui`)
+- PostgreSQL 16 + Prisma 6 (`prisma/schema.prisma` already covers ALL phases)
+- Socket.IO for live updates – runs inside the custom server `server.ts` (same port as Next)
+- PWA (manifest + service worker) for tablets/phones
+- Vitest (unit tests in `tests/unit`), Playwright (e2e in `tests/e2e`)
+- Docker Compose for Postgres (and the app with `--profile app`)
+
+## Rules (always follow)
+- Multi-tenant: every tenant table has `restaurantId` (and `branchId` where needed). Every API query
+  MUST filter by `session.restaurantId` / `session.branchId`. One restaurant never sees another's data.
+- Roles: OWNER, MANAGER, CASHIER, WAITER, CHEF, DELIVERY, CUSTOMER. Permissions live in `src/lib/roles.ts`
+  and are checked on the SERVER with `requireSession("perm.name")` (`src/lib/api.ts`).
+- Restaurant type → feature flags per branch (`src/lib/features.ts`, stored in `Branch.features`).
+- Money = integer paise. Never floats for stored money. Default INR, currency configurable.
+- Indian GST (CGST/SGST or IGST, HSN/SAC on tax rates); bill maths is in `src/lib/billing.ts`.
+- Audit log for discount / cancel / refund / price change / delete: `audit()` in `src/lib/audit.ts`.
+- Validate input with Zod; API errors are plain-English messages (`handler()` wrapper).
+- Big touch buttons on POS/kitchen; light & dark mode.
+- External services (payments, SMS/WhatsApp, AI) are behind interfaces with MOCK implementations
+  (`src/lib/services/*`). Never put real keys in code.
+
+## Folder structure
+```
+server.ts                 custom server (Next + Socket.IO)
+prisma/schema.prisma      full DB schema; prisma/seed*.ts demo data
+src/app/login             login page (email+password, 4-digit PIN)
+src/app/(app)/*           staff screens (sidebar layout, role-based nav)
+src/app/t, o, track, b, book   public customer pages (QR menu, online order, tracking, bill, booking)
+src/app/api/*             API routes (all use handler()+requireSession())
+src/lib/*                 business logic (pure functions are unit-tested)
+src/components/ui         UI kit; src/components/app  shell/context
+tests/unit, tests/e2e     tests
+```
+
+## Commands
+- Start DB: `service postgresql start` (or `docker compose up -d db`)
+- Create tables: `npx prisma db push` · Seed demo: `npm run db:seed` · Reset: `npm run db:reset`
+- Run app: `npm run dev` → http://localhost:3000
+- Unit tests: `npm test` · DB integration tests: `npm run test:integration` (uses database dineflow_test) · Type check: `npm run typecheck` · E2E: `npm run test:e2e`
+- Security route check: `npm run audit:routes` · Performance: `npm run perf -- http://localhost:3000` · Backup: `DATABASE_URL=... npm run backup`
+- Production: `npm run build && npm start` (see DEPLOYMENT.md, ENVIRONMENT.md). Dev builds go to `.next-dev`, production to `.next`.
+- Demo logins: owner@demo.com / manager@ / cashier@ / waiter@ / chef@ / rider@ — password `password123`.
+  PINs (restaurant code `demo`): owner 1111, manager 2222, cashier 3333, waiter 4444, chef 5555, rider 6666.
+
+## Phase checklist
+- [x] Phase 0 – Project setup, database, login, roles
+- [x] Phase 1 – Restaurant/branch setup, menu (signup, onboarding wizard, settings, menu CRUD, variants, add-ons, combos, time menus, CSV/Excel import-export, demo menu)
+- [x] Phase 2 – Tables (drag-drop floor plan, sections, status colours, merge/move), POS, waiter phone view, hold/resume, KOT, tokens, discounts/coupons/complimentary with manager PIN
+- [x] Phase 3 – Kitchen display (Socket.IO live, sound, stations, orange/red timers, New→Preparing→Ready→Served, ready alerts)
+- [x] Phase 4 – Billing: GST (CGST/SGST/IGST per rate), service/packing charge, round-off, split (equal/items/person), merge bills, split payments, Razorpay test + mock gateway, ESC/POS 58/80mm, PDF, share link (mock), refunds, void, day-end cash closing
+- [x] Phase 5 – QR ordering: per-table QR sheet, public menu (en/te/hi), cart, auto-accept or waiter approval, call waiter / ask bill alerts, live status, pay from phone (mock/Razorpay test), rating
+- [x] Phase 6 – Reservations (staff + online form, 7-day calendar, auto table pick, clash check, no-show tracking), waitlist with wait estimate + "table ready" message (mock), online ordering site /o/<slug> with pincode delivery zones, delivery assignment, rider phone view, customer tracking, aggregator interface + mock Swiggy/Zomato webhook
+- [x] Phase 7 – Inventory: ingredients (g/ml/pcs base units + kg/L conversion), recipes per dish/size, auto deduct on KOT + return on cancel, low-stock alerts, expiry (FIFO batches), wastage, stock count, suppliers, purchase orders, goods received, supplier dues, food cost %
+- [x] Phase 8 – Staff: profiles, roles, extra-permission editor, PIN/password, shifts (7-day planner), clock in/out, leave requests + approval, tip sharing by hours, monthly salary summary (Excel export), audit log screen with filters
+- [x] Phase 9 – Customers: auto-created from phone on paid orders, profile (visits, favourites, spend, points, feedback), loyalty earn/redeem (max 50%), tiers with multipliers, coupons, campaigns to segments (birthday/anniversary/inactive/tier) with mock sender, feedback dashboard + low-rating alerts
+- [x] Phase 10 – Live dashboard (today vs last week, hourly chart, top items, occupancy) + 12 reports (sales, item, category, busy hours, payment modes, discounts, cancellations, GST, staff, inventory/waste, profit per dish, branches) with date & branch filters, chart/table views, Excel + PDF export; 60-day demo history
+- [x] Phase 11 – Smart features behind one AI service (`src/lib/services/ai.ts`, OFF by default with rule-based fallbacks): 7-day item forecast, purchase suggestion from forecast+recipes+stock, menu engineering (Star/Plowhorse/Puzzle/Dog), review summary, "often ordered together" upsell on POS + QR menu, voice order taking with confirm step
+- [x] Phase 12 – Offline mode (IndexedDB outbox + sync, no duplicates; service worker; PWA), security review + fixes (SECURITY.md, route audit, security e2e), full journey e2e, 12k-order performance check (PERFORMANCE.md) + atomic order numbers, production Dockerfile, backup/restore scripts, ENVIRONMENT.md, DEPLOYMENT.md
+
+See `DECISIONS.md` for choices made while building, `TODO.md` for known gaps, `SECURITY.md`, `PERFORMANCE.md`, `DEPLOYMENT.md`.
