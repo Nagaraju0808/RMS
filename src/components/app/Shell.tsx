@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { LayoutDashboard, ShoppingCart, Smartphone, LayoutGrid, ClipboardList, ChefHat, Receipt, CalendarDays, Bike, UtensilsCrossed, Package, Users, UserCog, Clock, BarChart3, Sparkles, ShieldCheck, Settings, Circle, Menu as MenuIcon, X, Moon, Sun, LogOut, ChevronDown, BellRing, HandPlatter, Smartphone as Phone, TriangleAlert, PackageX, Utensils } from "lucide-react";
 import { AppProvider, useApp, useLive } from "./AppContext";
 import { Mark } from "./Mark";
+import { OfflineBanner } from "./OfflineBanner";
 import { cn } from "@/lib/utils";
 
 const Icons: Record<string, any> = { LayoutDashboard, ShoppingCart, Smartphone, LayoutGrid, ClipboardList, ChefHat, Receipt, CalendarDays, Bike, UtensilsCrossed, Package, Users, UserCog, Clock, BarChart3, Sparkles, ShieldCheck, Settings };
@@ -134,7 +135,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <div className="flex min-w-0 flex-1 flex-col">
           <TopBar setOpen={setOpen} />
           {/* The sheet: white, inset 8px from the right and bottom, 16px corners, 1px edge, no shadow. */}
-          <main className="min-w-0 flex-1 bg-[var(--surface)] px-5 py-4 md:mb-2 md:mr-2 md:rounded-[var(--radius-sheet)] md:border md:border-[var(--border)] md:p-6">{children}</main>
+          <main className="min-w-0 flex-1 bg-[var(--surface)] px-5 py-4 md:mb-2 md:mr-2 md:rounded-[var(--radius-sheet)] md:border md:border-[var(--border)] md:p-6"><OfflineBanner />{children}</main>
         </div>
         <Alerts />
       </div>

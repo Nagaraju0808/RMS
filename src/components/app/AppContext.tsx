@@ -19,7 +19,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const load = React.useCallback(() => {
     fetch("/api/auth/me").then(async (r) => {
       if (r.status === 401) { location.href = "/login"; return; }
-      setMe(await r.json());
+      const d = await r.json(); setMe(d);
+      try { localStorage.setItem("df-cache:/api/auth/me", JSON.stringify(d)); } catch {}
+    }).catch(() => {
+      // Offline: use the last known login details so POS and kitchen keep working.
+      try { const c = localStorage.getItem("df-cache:/api/auth/me"); if (c) setMe(JSON.parse(c)); } catch {}
     });
   }, []);
   React.useEffect(() => { load(); }, [load]);

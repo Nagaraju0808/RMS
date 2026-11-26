@@ -2,7 +2,8 @@
 import * as React from "react";
 import { Mic, X } from "lucide-react";
 import { Badge, Button, Dialog, Input, Label, Select, Textarea, useToast } from "@/components/ui";
-import { api, rs } from "@/lib/client";
+import { api, cachedApi, rs } from "@/lib/client";
+import { isNetworkError, queueRequest } from "@/lib/offline/outbox";
 import { itemAvailable, priceFor, Channel } from "@/lib/menu";
 import { computeBill } from "@/lib/billing";
 import { useApp, useLive } from "@/components/app/AppContext";
@@ -38,12 +39,12 @@ export function OrderBuilder({ mode = "pos", initialOrderId, initialTableId, onD
   const settings = me?.branch?.settings || {};
 
   React.useEffect(() => {
-    api("/api/menu").then((m) => {
+    cachedApi("/api/menu").then((m) => {
       const def = m.taxRates.find((t: any) => t.isDefault)?.ratePercent ?? 5;
       m.items = m.items.map((i: any) => ({ ...i, taxPercent: m.taxRates.find((t: any) => t.id === i.taxRateId)?.ratePercent ?? def }));
       setMenu(m);
     });
-    if (features.tables !== false) api("/api/tables").then((d) => setTables(d.tables)).catch(() => {});
+    if (features.tables !== false) cachedApi("/api/tables").then((d) => setTables(d.tables)).catch(() => {});
   }, [features.tables]);
   React.useEffect(() => { if (me && features.tables === false && type === "DINE_IN") setType("TAKEAWAY"); }, [me]); // eslint-disable-line
   const loadOrder = React.useCallback(async (id: string) => {
@@ -92,7 +93,16 @@ export function OrderBuilder({ mode = "pos", initialOrderId, initialTableId, onD
       let o = order;
       if (!o) {
         if (!pending.length) throw new Error("Add some items first.");
-        o = await api("/api/orders", { body: { type, tableId: type === "DINE_IN" ? tableId || null : null, ...cust, customerName: cust.customerName || undefined, customerPhone: cust.customerPhone || undefined, notes: cust.notes || undefined, deliveryAddress: cust.deliveryAddress || undefined, items: pending.map(lineBody), send: opts.send, hold: opts.hold, clientId: crypto.randomUUID() } });
+        const body = { type, tableId: type === "DINE_IN" ? tableId || null : null, ...cust, customerName: cust.customerName || undefined, customerPhone: cust.customerPhone || undefined, notes: cust.notes || undefined, deliveryAddress: cust.deliveryAddress || undefined, items: pending.map(lineBody), send: opts.send, hold: opts.hold, clientId: crypto.randomUUID() };
+        try { o = await api("/api/orders", { body }); }
+        catch (e) {
+          if (!isNetworkError(e)) throw e;
+          // No internet: keep the order on this device; it is sent (once) when the connection returns.
+          const tableName = tables.find((t) => t.id === tableId)?.name;
+          await queueRequest({ id: body.clientId, kind: "order", url: "/api/orders", method: "POST", body, label: `${tableName ? `Table ${tableName}` : type.replace("_", "-").toLowerCase()} – ${pending.reduce((n, l) => n + l.quantity, 0)} items` });
+          toast("No internet – order saved on this device and will be sent automatically");
+          newOrder(); return;
+        }
       } else if (pending.length) {
         o = await api(`/api/orders/${o.id}/items`, { body: { items: pending.map(lineBody), send: opts.send } });
         if (opts.hold) o = await api(`/api/orders/${o.id}/hold`, { body: { hold: true } });

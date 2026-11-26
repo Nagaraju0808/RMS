@@ -2,7 +2,8 @@
 import * as React from "react";
 import { Bell, BellOff, Maximize } from "lucide-react";
 import { Button } from "@/components/ui";
-import { api } from "@/lib/client";
+import { api, cachedApi } from "@/lib/client";
+import { isNetworkError, queueRequest } from "@/lib/offline/outbox";
 import { useApp, useLive } from "@/components/app/AppContext";
 import { ticketStatus, timerLevel } from "@/lib/kitchen";
 import { cn } from "@/lib/utils";
@@ -25,7 +26,7 @@ export default function KitchenPage() {
   const [sound, setSound] = React.useState(true);
   const [now, setNow] = React.useState(new Date());
   const [err, setErr] = React.useState("");
-  const load = React.useCallback(() => api(`/api/kitchen${station ? `?station=${station}` : ""}`).then(setData).catch((e) => setErr(e.message)), [station]);
+  const load = React.useCallback(() => cachedApi(`/api/kitchen${station ? `?station=${station}` : ""}`).then((d: any) => { setData(d); setErr(d._offline ? "No internet – showing the last tickets. Taps are saved and sent when the connection returns." : ""); }).catch((e) => setErr(e.message)), [station]);
   React.useEffect(() => { load(); try { const s = localStorage.getItem("kds_station"); if (s) setStation(s); } catch {} }, []); // eslint-disable-line
   React.useEffect(() => { load(); }, [load]);
   React.useEffect(() => { const t = setInterval(() => setNow(new Date()), 15000); const r = setInterval(load, 60000); return () => { clearInterval(t); clearInterval(r); }; }, [load]);
@@ -33,7 +34,15 @@ export default function KitchenPage() {
   useLive("item:status", load);
   useLive("order:updated", load);
   const warn = me?.branch?.settings?.kdsWarnMins ?? 10, late = me?.branch?.settings?.kdsLateMins ?? 20;
-  const bump = (url: string, status: string) => api(url, { body: { status, stationId: station || undefined } }).then(load).catch((e) => setErr(e.message));
+  const bump = (url: string, status: string) => {
+    const body = { status, stationId: station || undefined };
+    // Optimistic: move the ticket on screen at once (also offline).
+    setData((d) => d && { ...d, kots: d.kots.map((k: any) => ({ ...k, items: k.items.map((i: any) => (url.endsWith(i.id) || url.endsWith(k.id)) && i.status !== "CANCELLED" && (!station || i.stationId === station) ? { ...i, status } : i) })) });
+    return api(url, { body }).then(load).catch(async (e) => {
+      if (isNetworkError(e)) { await queueRequest({ id: `${url}:${status}`, kind: "kitchen", url, method: "POST", body, label: `Kitchen: ${status.toLowerCase()}` }); return; }
+      setErr(e.message); load();
+    });
+  };
   if (!data) return <p className="muted">Loading… {err}</p>;
   const cols = [{ k: "NEW", t: "New" }, { k: "PREPARING", t: "Preparing" }, { k: "READY", t: "Ready" }];
   return (
