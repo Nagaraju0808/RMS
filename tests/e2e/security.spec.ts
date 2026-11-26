@@ -6,7 +6,7 @@ import { join } from "path";
 const routes: { path: string; methods: string[] }[] = [];
 const walk = (d: string) => { for (const f of readdirSync(d)) { const p = join(d, f); if (statSync(p).isDirectory()) walk(p); else if (f === "route.ts") routes.push({ path: "/" + p.replace(/^src\/app\//, "").replace(/\/route\.ts$/, "").replace(/\[[^\]]+\]/g, "x"), methods: [...readFileSync(p, "utf8").matchAll(/export (?:const|async function) (GET|POST|PUT|PATCH|DELETE)/g)].map((m) => m[1]) }); } };
 walk("src/app/api");
-const PUBLIC = /^\/api\/(public|auth\/(login|pin|signup|logout|demo))/;
+const PUBLIC = /^\/api\/(public|health|auth\/(login|pin|signup|logout|demo))/;
 
 test("all private API routes return 401 without a login", async ({ request }) => {
   const leaks: string[] = [];

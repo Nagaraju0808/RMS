@@ -8,3 +8,6 @@
 - Offline: adding items to an existing order, billing and payment still need internet (needs idempotency keys on those APIs).
 - Switch from `prisma db push` to `prisma migrate` (versioned migration files) before several developers work on the schema.
 - Before taking real payments: Razorpay live keys + webhook for payment confirmation, and a legal GST invoice review by an accountant.
+- Docker image: the Dockerfile passes `docker build --check`, and the same production steps (`npm run build` + `npx tsx server.ts`)
+  were run and tested directly, but the full image build could not run in the cloud build sandbox (no access to Debian package
+  servers). Run `docker compose --profile app up -d --build` once on a normal machine to confirm.
