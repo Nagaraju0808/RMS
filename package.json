@@ -13,7 +13,10 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
-    "db:reset": "prisma db push --force-reset && tsx prisma/seed.ts"
+    "db:reset": "prisma db push --force-reset && tsx prisma/seed.ts",
+    "audit:routes": "node scripts/audit-routes.mjs",
+    "perf": "node scripts/perf.mjs",
+    "backup": "./scripts/backup.sh"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

@@ -8,3 +8,4 @@ playwright-report
 backups/*.sql*
 public/uploads
 .taste-skill/
+.next-dev

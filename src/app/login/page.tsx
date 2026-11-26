@@ -9,6 +9,8 @@ export default function LoginPage() {
   const [restaurant, setRestaurant] = React.useState("demo");
   const [pin, setPin] = React.useState("");
   const [err, setErr] = React.useState("");
+  const [ready, setReady] = React.useState(false); // buttons wait until the page is interactive
+  React.useEffect(() => setReady(true), []);
   const [busy, setBusy] = React.useState(false);
 
   React.useEffect(() => { try { const r = localStorage.getItem("df_restaurant"); if (r) setRestaurant(r); } catch {} }, []);
@@ -48,7 +50,7 @@ export default function LoginPage() {
           <form onSubmit={submit} className="space-y-3">
             <div><Label htmlFor="email">Email</Label><Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="username" /></div>
             <div><Label htmlFor="password">Password</Label><Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" /></div>
-            <Button className="w-full" disabled={busy}>{busy ? "Logging in…" : "Log in"}</Button>
+            <Button className="w-full" disabled={busy || !ready}>{busy ? "Logging in…" : "Log in"}</Button>
           </form>
         ) : (
           <div className="space-y-3">

@@ -6,6 +6,8 @@ import { api } from "@/lib/client";
 export default function Signup() {
   const [f, setF] = React.useState({ restaurantName: "", ownerName: "", email: "", password: "", pin: "" });
   const [err, setErr] = React.useState("");
+  const [ready, setReady] = React.useState(false); // buttons wait until the page is interactive
+  React.useEffect(() => setReady(true), []);
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: e.target.value });
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setErr("");
@@ -21,7 +23,7 @@ export default function Signup() {
           <div><Label htmlFor="em">Email</Label><Input id="em" type="email" value={f.email} onChange={set("email")} required /></div>
           <div><Label htmlFor="pw">Password (8+ characters)</Label><Input id="pw" type="password" value={f.password} onChange={set("password")} required /></div>
           <div><Label htmlFor="pin">4-digit PIN for quick login</Label><Input id="pin" inputMode="numeric" maxLength={4} value={f.pin} onChange={set("pin")} required /></div>
-          <Button className="w-full">Create</Button>
+          <Button className="w-full" disabled={!ready}>Create</Button>
         </form>
         {err && <p role="alert" className="mt-3 text-sm text-red-600">{err}</p>}
         <a href="/login" className="mt-4 block text-center text-sm text-brand-600">I already have an account</a>

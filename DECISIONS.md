@@ -104,3 +104,17 @@
     (`src/lib/sql-tz.ts`). The demo seed also runs in restaurant time.
 57. **Demo login link** `/api/auth/demo?as=owner&next=/dashboard` exists only for screenshots/checks: off unless
     `DEMO_LOGIN=1`, and never in production.
+
+## Phase 12
+58. **Offline scope**: new POS orders (with their KOT) and kitchen status taps are saved on the device (IndexedDB outbox) and
+    replayed in order when the internet returns. Adding items to an order that already exists, billing and payments need
+    the internet (they are not safely repeatable yet) – listed in TODO.md. Menu, tables, kitchen tickets and the login are
+    kept as the last known copy so the screens open offline; the service worker (production only) keeps the pages themselves.
+59. **No duplicates**: each order carries a clientId; the server returns the existing order for a repeat, also when two
+    copies arrive at the same moment. Refused entries (dish no longer available…) are shown to staff, not silently dropped.
+60. **Order and token numbers** come from one atomic database update (found 13/30 duplicates under load before the fix).
+61. **Every API call re-checks the user** in the database (switched-off staff lose access at once). Cost: one small
+    query per request – measured as negligible (PERFORMANCE.md).
+62. **CSRF**: Origin check on state-changing API calls + JSON-only bodies, on top of SameSite=Lax cookies.
+63. **Deployment target**: one Docker image running Next.js + Socket.IO (`npx tsx server.ts`), schema applied with
+    `prisma db push` on start (migration files are a TODO before multi-person development), Caddy for HTTPS.

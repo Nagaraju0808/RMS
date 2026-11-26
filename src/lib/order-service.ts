@@ -6,7 +6,7 @@ import { ApiError } from "./api";
 import { Session } from "./session";
 import { checkSecret } from "./auth";
 import { happyHourPercent, itemAvailable } from "./menu";
-import { lineName, nextToken, todayStr, unitPrice, unsentItems } from "./orders";
+import { lineName, todayStr, unitPrice, unsentItems } from "./orders";
 import { resolveFeatures, RestaurantTypeName } from "./features";
 import { emitToBranch, emitToRoom } from "./realtime";
 import { onItemsSold } from "./stock-hooks";
@@ -84,16 +84,19 @@ export async function createOrder(s: Pick<Session, "restaurantId" | "branchId" |
   }
   const lines = await resolveLines(s.restaurantId, d.type, d.items);
   const today = todayStr();
-  const order = await prisma.$transaction(async (tx) => {
-    let tokenNo: number | null = null;
-    if (features.tokens && d.type !== "DINE_IN") {
-      const b = await tx.branch.findUniqueOrThrow({ where: { id: branch.id } });
-      const t = nextToken(b.tokenCounter, b.tokenDate, today);
-      await tx.branch.update({ where: { id: branch.id }, data: { tokenCounter: t.token, tokenDate: t.date } });
-      tokenNo = t.token;
-    }
-    const start = new Date(); start.setHours(0, 0, 0, 0);
-    const orderNo = (await tx.order.count({ where: { branchId: branch.id, createdAt: { gte: start } } })) + 1;
+  const run = () => prisma.$transaction(async (tx) => {
+    // Daily order and token numbers come from ONE atomic UPDATE … RETURNING (row lock), so tills sending at the same
+    // moment can never get the same number.
+    const useToken = features.tokens && d.type !== "DINE_IN";
+    const [num] = await tx.$queryRaw<{ orderNo: number; tokenNo: number }[]>`
+      UPDATE "Branch" SET
+        "orderCounter" = CASE WHEN "orderDate" = ${today} THEN "orderCounter" + 1 ELSE 1 END,
+        "orderDate" = ${today},
+        "tokenCounter" = CASE WHEN ${useToken} THEN (CASE WHEN "tokenDate" = ${today} THEN "tokenCounter" + 1 ELSE 1 END) ELSE "tokenCounter" END,
+        "tokenDate" = CASE WHEN ${useToken} THEN ${today} ELSE "tokenDate" END
+      WHERE id = ${branch.id}
+      RETURNING "orderCounter" AS "orderNo", "tokenCounter" AS "tokenNo"`;
+    const orderNo = num.orderNo, tokenNo = useToken ? num.tokenNo : null;
     const o = await tx.order.create({
       data: {
         restaurantId: s.restaurantId, branchId: branch.id, orderNo, tokenNo, type: d.type, tableId: d.tableId ?? null, waiterId: s.sub || null,
@@ -108,6 +111,16 @@ export async function createOrder(s: Pick<Session, "restaurantId" | "branchId" |
     if (d.send && !d.hold && o.status === "OPEN") await sendKotTx(tx, o.id, branch.id);
     return o;
   });
+  let order;
+  try { order = await run(); }
+  catch (e: any) {
+    // The same clientId arrived twice at the same moment (offline replay): return the order the other request created.
+    if (e?.code === "P2002" && d.clientId) {
+      const existing = await prisma.order.findUnique({ where: { clientId: d.clientId } });
+      if (existing && existing.restaurantId === s.restaurantId) return { order: await loadOrder({ ...s, branchId: existing.branchId }, existing.id), duplicate: true };
+    }
+    throw e;
+  }
   const full = await loadOrder({ restaurantId: s.restaurantId, branchId: branch.id }, order.id);
   emitToBranch(branch.id, "order:new", { id: full.id });
   if (d.tableId) emitToBranch(branch.id, "table:updated", { id: d.tableId });

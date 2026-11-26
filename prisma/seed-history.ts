@@ -58,6 +58,8 @@ export async function seedHistory(p: PrismaClient, rid: string, b1: string, b2: 
   await chunk(payments, (r) => p.payment.createMany({ data: r }));
   await chunk(feedback, (r) => p.feedback.createMany({ data: r }));
   await p.branch.update({ where: { id: b1 }, data: { billCounter: billSeq } });
+  const todayKey = new Date().toLocaleDateString("en-CA");
+  for (const b of [b1, b2]) await p.branch.update({ where: { id: b }, data: { orderDate: todayKey, orderCounter: orders.filter((o) => o.branchId === b && o.createdAt.toLocaleDateString("en-CA") === todayKey).reduce((m, o) => Math.max(m, o.orderNo), 0) } });
   for (const [id, s] of spend) await p.customer.update({ where: { id }, data: { totalSpend: s.total, visits: s.visits, lastVisitAt: s.last, points: Math.floor(s.total / 10000) * 5 } });
   // attendance for the last 14 days
   const staff = await p.user.findMany({ where: { restaurantId: rid, role: { notIn: ["OWNER"] } } });

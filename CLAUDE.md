@@ -44,6 +44,8 @@ tests/unit, tests/e2e     tests
 - Create tables: `npx prisma db push` · Seed demo: `npm run db:seed` · Reset: `npm run db:reset`
 - Run app: `npm run dev` → http://localhost:3000
 - Unit tests: `npm test` · DB integration tests: `npm run test:integration` (uses database dineflow_test) · Type check: `npm run typecheck` · E2E: `npm run test:e2e`
+- Security route check: `npm run audit:routes` · Performance: `npm run perf -- http://localhost:3000` · Backup: `DATABASE_URL=... npm run backup`
+- Production: `npm run build && npm start` (see DEPLOYMENT.md, ENVIRONMENT.md). Dev builds go to `.next-dev`, production to `.next`.
 - Demo logins: owner@demo.com / manager@ / cashier@ / waiter@ / chef@ / rider@ — password `password123`.
   PINs (restaurant code `demo`): owner 1111, manager 2222, cashier 3333, waiter 4444, chef 5555, rider 6666.
 
@@ -60,6 +62,6 @@ tests/unit, tests/e2e     tests
 - [x] Phase 9 – Customers: auto-created from phone on paid orders, profile (visits, favourites, spend, points, feedback), loyalty earn/redeem (max 50%), tiers with multipliers, coupons, campaigns to segments (birthday/anniversary/inactive/tier) with mock sender, feedback dashboard + low-rating alerts
 - [x] Phase 10 – Live dashboard (today vs last week, hourly chart, top items, occupancy) + 12 reports (sales, item, category, busy hours, payment modes, discounts, cancellations, GST, staff, inventory/waste, profit per dish, branches) with date & branch filters, chart/table views, Excel + PDF export; 60-day demo history
 - [x] Phase 11 – Smart features behind one AI service (`src/lib/services/ai.ts`, OFF by default with rule-based fallbacks): 7-day item forecast, purchase suggestion from forecast+recipes+stock, menu engineering (Star/Plowhorse/Puzzle/Dog), review summary, "often ordered together" upsell on POS + QR menu, voice order taking with confirm step
-- [ ] Phase 12 – Offline mode, security check, testing, deployment
+- [x] Phase 12 – Offline mode (IndexedDB outbox + sync, no duplicates; service worker; PWA), security review + fixes (SECURITY.md, route audit, security e2e), full journey e2e, 12k-order performance check (PERFORMANCE.md) + atomic order numbers, production Dockerfile, backup/restore scripts, ENVIRONMENT.md, DEPLOYMENT.md
 
-See `DECISIONS.md` for choices made while building, `TODO.md` for known gaps.
+See `DECISIONS.md` for choices made while building, `TODO.md` for known gaps, `SECURITY.md`, `PERFORMANCE.md`, `DEPLOYMENT.md`.

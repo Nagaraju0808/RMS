@@ -219,6 +219,8 @@ model Branch {
   stateCode        String   @default("36") // GST state code (36 = Telangana)
   features         Json     @default("{}")  // feature flags (see src/lib/features.ts)
   settings         Json     @default("{}")  // service charge %, kds limits, qr auto-accept...
+  orderCounter     Int      @default(0) // daily order number, increased atomically
+  orderDate        String?
   tokenCounter     Int      @default(0)
   tokenDate        String?
   billCounter      Int      @default(0)

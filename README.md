@@ -25,6 +25,12 @@ Works for fine dining, quick service, cafés, cloud kitchens, bars, food trucks 
 
 Password for all: `password123`. For PIN login, restaurant code is `demo`.
 
+## Going live
+See **DEPLOYMENT.md** (step by step), **ENVIRONMENT.md** (settings), **SECURITY.md** and **PERFORMANCE.md**.
+The app works offline on POS and kitchen tablets (orders are saved on the device and sent when the internet returns).
+
 ## Tests
 - `npm test` – unit tests (bill maths, tax, stock, …)
+- `npm run test:integration` – database tests (uses the `dineflow_test` database)
 - `npm run test:e2e` – browser tests (starts the app automatically)
+- `npm run audit:routes` – checks every API route requires a login

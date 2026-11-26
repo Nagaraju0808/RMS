@@ -23,6 +23,8 @@ const csp = [
 if (isProd) securityHeaders.push({ key: "Content-Security-Policy", value: csp }, { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" });
 
 const nextConfig = {
+  // The dev server and production builds use separate folders, so running both never mixes their files.
+  distDir: isProd ? ".next" : ".next-dev",
   poweredByHeader: false,
   serverExternalPackages: ["pdfkit", "exceljs", "@prisma/client", "bcryptjs"],
   eslint: { ignoreDuringBuilds: true },
