@@ -7,7 +7,7 @@ import { createReservation } from "@/lib/reservation-service";
 import { resolveFeatures, RestaurantTypeName } from "@/lib/features";
 
 async function restaurant(slug: string) {
-  const r = await prisma.restaurant.findUnique({ where: { slug }, include: { branches: true } });
+  const r = await prisma.restaurant.findUnique({ where: { slug }, include: { branches: { orderBy: { createdAt: "asc" } } } });
   if (!r) notFound("Restaurant");
   return r;
 }

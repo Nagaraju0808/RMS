@@ -9,7 +9,7 @@ import { LineSchema } from "@/lib/order-service";
 import { placeOnlineOrder } from "@/lib/online-service";
 
 async function load(slug: string) {
-  const r = await prisma.restaurant.findUnique({ where: { slug }, include: { branches: true } });
+  const r = await prisma.restaurant.findUnique({ where: { slug }, include: { branches: { orderBy: { createdAt: "asc" } } } });
   if (!r) notFound("Restaurant");
   const branches = r.branches.filter((b) => resolveFeatures(b.features, r.type as RestaurantTypeName).onlineOrders);
   return { r, branches };

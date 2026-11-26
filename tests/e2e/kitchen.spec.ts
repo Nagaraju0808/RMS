@@ -10,7 +10,7 @@ test("order sent from POS appears live on kitchen screen and can be marked ready
   await cashier.getByRole("button", { name: "Send KOT" }).click();
   await expect(cashier.getByText(/KOT sent/)).toBeVisible();
   await expect(chef.getByTestId("kot")).toHaveCount(before + 1, { timeout: 15000 }); // arrives live via Socket.IO
-  const card = chef.getByTestId("kot").filter({ hasText: "Veg Fried Rice" }).last();
+  const card = chef.getByTestId("kot").filter({ hasText: "Veg Fried Rice" }).filter({ has: chef.getByRole("button", { name: "All ready" }) }).last();
   await card.getByRole("button", { name: "All ready" }).click();
   await expect(chef.getByRole("heading", { name: /Ready/ })).toBeVisible();
   await expect(cashier.getByRole("alert").filter({ hasText: "Ready" })).toBeVisible({ timeout: 15000 }); // waiter/cashier alert

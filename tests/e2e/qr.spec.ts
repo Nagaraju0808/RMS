@@ -14,7 +14,7 @@ test("customer orders from table QR, waiter approves, kitchen gets it", async ({
   await cust.getByRole("button", { name: "ఆర్డర్ చేయండి" }).click();
   await expect(cust.getByText(/సిబ్బంది నిర్ధారణ/)).toBeVisible();
   await staff.goto("/orders");
-  await staff.getByRole("button", { name: "QR approval" }).click();
+  await staff.getByRole("tab", { name: "QR approval" }).click();
   await staff.getByRole("button", { name: "Accept" }).first().click();
   await expect(cust.getByText("అందింది").first()).toBeVisible({ timeout: 15000 });
   await cust.getByRole("button", { name: /వెయిటర్‌ను పిలవండి/ }).click();

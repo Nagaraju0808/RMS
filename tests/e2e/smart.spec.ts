@@ -5,9 +5,9 @@ test("smart insights work with AI off (fallbacks)", async ({ page }) => {
   await page.goto("/smart");
   await expect(page.getByText("Dishes expected per day")).toBeVisible();
   await expect(page.getByText(/AI is off/)).toBeVisible();
-  await page.getByRole("button", { name: "What to buy" }).click();
+  await page.getByRole("tab", { name: "What to buy" }).click();
   await expect(page.getByRole("columnheader", { name: "Order" })).toBeVisible();
-  await page.getByRole("button", { name: "Review summary" }).click();
+  await page.getByRole("tab", { name: "Review summary" }).click();
   await expect(page.getByText("What customers talk about")).toBeVisible();
 });
 test("voice order fills the cart for the waiter to confirm", async ({ page }) => {
