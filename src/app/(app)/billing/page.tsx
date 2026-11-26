@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { Printer, X } from "lucide-react";
 import { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -74,7 +75,7 @@ function DayClosing() {
       <Label>Opening cash (₹)</Label><Input type="number" value={opening} onChange={(e) => setOpening(e.target.value)} />
       <Label>Cash counted now (₹)</Label><Input type="number" value={counted} onChange={(e) => setCounted(e.target.value)} />
       <div className="flex justify-between"><span>Expected in drawer</span><b>{rs(expected)}</b></div>
-      {counted && <div className={`flex justify-between font-bold ${diff === 0 ? "text-green-600" : "text-red-600"}`}><span>{diff === 0 ? "Matches ✓" : diff > 0 ? "Extra cash" : "Short"}</span><span>{rs(Math.abs(diff))}</span></div>}
+      {counted && <div className={`flex justify-between font-bold ${diff === 0 ? "text-green-600" : "text-red-600"}`}><span>{diff === 0 ? "Matches" : diff > 0 ? "Extra cash" : "Short"}</span><span>{rs(Math.abs(diff))}</span></div>}
       <Button className="w-full" onClick={() => api("/api/cash-closing", { body: { openingCash: Math.round(Number(opening) * 100), countedCash: Math.round(Number(counted) * 100) } }).then(() => { toast("Day closed"); load(); }).catch((e) => toast(e.message, "err"))}>Save day-end closing</Button>
     </Card>
     <Card className="md:col-span-2"><h2 className="mb-2 font-semibold">Past closings</h2>
@@ -114,7 +115,7 @@ function OrderBilling({ orderId }: { orderId: string }) {
       </PageHeader>
       <div className="grid gap-4 lg:grid-cols-[1fr_380px]">
         <div className="space-y-3">
-          {activeBills.length > 1 && <div className="flex flex-wrap gap-2">{activeBills.map((b: any) => <Button key={b.id} variant={bill?.id === b.id ? "default" : "outline"} size="sm" onClick={async () => setBill(await api(`/api/bills/${b.id}`))}>{b.splitLabel || b.billNo} · {rs(b.total)} {b.status === "PAID" ? "✓" : ""}</Button>)}</div>}
+          {activeBills.length > 1 && <div className="flex flex-wrap gap-2">{activeBills.map((b: any) => <Button key={b.id} variant={bill?.id === b.id ? "default" : "outline"} size="sm" onClick={async () => setBill(await api(`/api/bills/${b.id}`))}>{b.splitLabel || b.billNo} · {rs(b.total)} {b.status === "PAID" ? "· paid" : ""}</Button>)}</div>}
           {!bill ? (
             <Card className="space-y-3">
               <p>No bill yet. Items: {o.items.filter((i: any) => i.status !== "CANCELLED").length}</p>
@@ -136,7 +137,7 @@ function OrderBilling({ orderId }: { orderId: string }) {
               <div key={i} className="flex gap-2">
                 <Select value={p.mode} onChange={(e) => setPays(pays.map((x, j) => (j === i ? { ...x, mode: e.target.value } : x)))} className="w-28"><option>CASH</option><option>CARD</option><option>UPI</option><option>WALLET</option></Select>
                 <Input aria-label="Amount" type="number" step="0.01" value={p.amount} onChange={(e) => setPays(pays.map((x, j) => (j === i ? { ...x, amount: e.target.value } : x)))} />
-                {pays.length > 1 && <Button variant="ghost" onClick={() => setPays(pays.filter((_, j) => j !== i))}>✕</Button>}
+                {pays.length > 1 && <Button variant="ghost" onClick={() => setPays(pays.filter((_, j) => j !== i))} aria-label="Remove payment line"><X size={16} /></Button>}
               </div>))}
             <div className="flex flex-wrap gap-1">{["CASH", "CARD", "UPI"].map((m) => <Button key={m} size="sm" variant="outline" onClick={() => setPays([{ mode: m, amount: (due / 100).toFixed(2) }])}>All {m}</Button>)}
               <Button size="sm" variant="outline" onClick={() => setPays([...pays, { mode: "UPI", amount: "0" }])}>+ Split payment</Button></div>
@@ -144,11 +145,11 @@ function OrderBilling({ orderId }: { orderId: string }) {
             <Button size="xl" variant="success" className="w-full" onClick={() => run(api(`/api/bills/${bill.id}/pay`, { body: { payments: pays.map((p) => ({ mode: p.mode, amount: Math.round(Number(p.amount) * 100) })) } }), "Payment saved")}>Take payment</Button>
             <Button variant="outline" className="w-full" onClick={async () => { const g = await api(`/api/bills/${bill.id}/gateway`, { body: {} }); if (g.mock) { if (confirm(`TEST MODE: simulate online payment of ${rs(g.amount)}?`)) run(api(`/api/bills/${bill.id}/gateway`, { body: { verify: { orderId: g.orderId } } }), "Online payment received"); } else toast("Open the Razorpay checkout on the customer page (/b/…) to pay online.", "err"); }}>Online payment (gateway – test mode)</Button>
           </>}
-          {due === 0 && <p className="rounded-lg bg-green-100 p-2 text-center font-semibold text-green-800">Paid ✓</p>}
+          {due === 0 && <p className="rounded-lg bg-green-100 p-2 text-center font-semibold text-green-800">Paid in full</p>}
           <div className="border-t border-app pt-3">
             <div className="mb-2 flex items-center gap-2"><span className="text-sm">Paper</span><Select value={width} onChange={(e) => setWidth(e.target.value as any)} className="w-24"><option value="80">80mm</option><option value="58">58mm</option></Select></div>
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" onClick={() => { const w = window.open("", "_blank", "width=400,height=600"); if (w) { w.document.write(`<pre style="font:12px monospace">${(width === "80" ? bill.receipt80 : bill.receipt58).replace(/</g, "&lt;")}</pre>`); w.document.close(); w.print(); } }}>🖨 Browser print</Button>
+              <Button variant="outline" onClick={() => { const w = window.open("", "_blank", "width=400,height=600"); if (w) { w.document.write(`<pre style="font:12px monospace">${(width === "80" ? bill.receipt80 : bill.receipt58).replace(/</g, "&lt;")}</pre>`); w.document.close(); w.print(); } }}><Printer size={16} />Browser print</Button>
               <a href={`/api/bills/${bill.id}/escpos?width=${width}`} className="contents"><Button variant="outline">Thermal (ESC/POS)</Button></a>
               <a href={`/api/bills/${bill.id}/pdf`} target="_blank" className="contents"><Button variant="outline">PDF bill</Button></a>
               <Button variant="outline" onClick={() => { const to = prompt("WhatsApp number / phone / email?"); if (!to) return; const ch = to.includes("@") ? "EMAIL" : confirm("Send by WhatsApp? (Cancel = SMS)") ? "WHATSAPP" : "SMS"; run(api(`/api/bills/${bill.id}/share`, { body: { channel: ch, to } }), `Bill sent by ${ch} (mock)`); }}>Share bill</Button>

@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { HandPlatter, Receipt } from "lucide-react";
 import { use } from "react";
 import { Badge, Button, Dialog, Input, useToast } from "@/components/ui";
 import { api, rs } from "@/lib/client";
@@ -71,18 +72,18 @@ export default function QrMenu({ params }: { params: Promise<{ token: string }> 
       {orders.length > 0 && <section className="m-3 card p-3">
         <h2 className="mb-1 font-semibold">{t("status", lang)}</h2>
         {orders.map((o) => <div key={o.id} className="text-sm">
-          {o.status === "PENDING_APPROVAL" && <p className="text-orange-600">⏳ {t("waiting", lang)}</p>}
+          {o.status === "PENDING_APPROVAL" && <p className="text-[var(--warning)]">{t("waiting", lang)}</p>}
           {o.items.map((i: any) => <div key={i.id} className="flex justify-between"><span>{i.quantity}× {i.name}</span><Badge color={i.status === "READY" ? "green" : i.status === "PREPARING" ? "orange" : i.status === "CANCELLED" ? "red" : "blue"}>{t(i.status, lang)}</Badge></div>)}
         </div>)}
-        {bills.map((b: any) => <a key={b.publicToken} href={`/b/${b.publicToken}`} className="mt-2 block"><Button className="w-full" variant={b.paid >= b.total ? "outline" : "success"}>{b.paid >= b.total ? "✓ " : ""}{b.splitLabel ? b.splitLabel + " · " : ""}{t("payNow", lang)} {rs(b.total - b.paid)}</Button></a>)}
-        {lastPaid && <a href={`/t/feedback?order=${lastPaid.id}`} className="mt-2 block text-center text-brand-600">⭐ {t("rate", lang)}</a>}
+        {bills.map((b: any) => <a key={b.publicToken} href={`/b/${b.publicToken}`} className="mt-2 block"><Button className="w-full" variant={b.paid >= b.total ? "outline" : "success"}>{b.paid >= b.total ? "Paid · " : ""}{b.splitLabel ? b.splitLabel + " · " : ""}{t("payNow", lang)} {rs(b.total - b.paid)}</Button></a>)}
+        {lastPaid && <a href={`/t/feedback?order=${lastPaid.id}`} className="mt-2 block text-center text-brand-600">{t("rate", lang)}</a>}
       </section>}
       <main className="space-y-2 p-3">
         {items.map((i: any) => (
           <div key={i.id} className={cn("card flex gap-3 p-3", !i.available && "opacity-50")}>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2"><FoodDot t={i.foodType} /><span className="font-semibold">{itemName(i, lang)}</span></div>
-              <div className="text-sm">{rs(i.price)} {i.spiceLevel > 0 && "🌶".repeat(i.spiceLevel)}</div>
+              <div className="text-sm">{rs(i.price)}{i.spiceLevel > 0 && <span className="muted"> · spice {i.spiceLevel}/3</span>}</div>
               {i.description && <p className="text-xs muted">{i.description}</p>}
               {i.allergens.length > 0 && <p className="text-xs muted">Contains: {i.allergens.join(", ")}</p>}
             </div>
@@ -93,7 +94,7 @@ export default function QrMenu({ params }: { params: Promise<{ token: string }> 
           </div>))}
       </main>
       <div className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-md space-y-2 bg-card p-3 shadow-[0_-2px_10px_rgba(0,0,0,.1)]">
-        <div className="grid grid-cols-2 gap-2"><Button variant="outline" onClick={() => request("CALL_WAITER")}>🙋 {t("callWaiter", lang)}</Button><Button variant="outline" onClick={() => request("ASK_BILL")}>🧾 {t("askBill", lang)}</Button></div>
+        <div className="grid grid-cols-2 gap-2"><Button variant="outline" onClick={() => request("CALL_WAITER")}><HandPlatter size={16} />{t("callWaiter", lang)}</Button><Button variant="outline" onClick={() => request("ASK_BILL")}><Receipt size={16} />{t("askBill", lang)}</Button></div>
         {count > 0 && <Button size="lg" className="w-full" onClick={() => setShowCart(true)}>{t("cart", lang)} ({count}) · {rs(bill.subtotal)}</Button>}
       </div>
       {showCart && <Dialog open onClose={() => setShowCart(false)} title={t("cart", lang)}>

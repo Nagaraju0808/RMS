@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { Mic, X } from "lucide-react";
 import { Badge, Button, Dialog, Input, Label, Select, Textarea, useToast } from "@/components/ui";
 import { api, rs } from "@/lib/client";
 import { itemAvailable, priceFor, Channel } from "@/lib/menu";
@@ -125,7 +126,7 @@ export function OrderBuilder({ mode = "pos", initialOrderId, initialTableId, onD
   const menuPane = (
     <div className="flex min-w-0 flex-1 flex-col">
       <div className="mb-2 flex gap-2">
-        <Button variant="outline" aria-label="Voice order" title="Speak the order" onClick={() => startVoice()} disabled={listening}>{listening ? "Listening…" : "🎤 Voice"}</Button>
+        <Button variant="outline" aria-label="Voice order" title="Speak the order" onClick={() => startVoice()} disabled={listening}><Mic size={16} />{listening ? "Listening…" : "Voice"}</Button>
         <Input ref={searchRef} placeholder="Search item or code  ( / )" value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && visible[0]) { add(visible[0]); setQ(""); } }} />
       </div>
       <div className="mb-2 flex gap-1 overflow-x-auto pb-1">
@@ -177,7 +178,7 @@ export function OrderBuilder({ mode = "pos", initialOrderId, initialTableId, onD
                 const reason = l.kotId ? prompt("Reason for cancelling this item?") : "";
                 if (l.kotId && !reason) return;
                 api(`/api/orders/${order.id}/items/${l.id}`, { method: "PUT", body: { cancel: true, reason } }).then(setOrder).catch((e) => toast(e.message, "err"));
-              }}>✕</button>}</div>
+              }}><X size={14} /></button>}</div>
           </div>))}
         {pending.map((l) => (
           <div key={l.key} className="flex items-center justify-between gap-2 rounded-lg border border-dashed border-brand-500 p-2 text-sm">
@@ -223,7 +224,7 @@ export function OrderBuilder({ mode = "pos", initialOrderId, initialTableId, onD
       {mode === "waiter" && <div className="sticky bottom-2 z-10"><Button size="lg" className="w-full" onClick={() => setShowCart(!showCart)}>{showCart ? "← Back to menu" : `View order (${pending.reduce((n, l) => n + l.quantity, 0)} new) · ${rs(preview.total)}`}</Button></div>}
       {voice && <Dialog open onClose={() => setVoice(null)} title="Check the voice order">
         <p className="mb-2 text-sm muted">Heard: “{voice.text}”</p>
-        {voice.items.map((l, i) => <div key={i} className="flex justify-between border-b border-app py-1"><span>{l.quantity} × {l.name}</span><button className="text-red-600" aria-label="remove" onClick={() => setVoice({ ...voice, items: voice.items.filter((_, j) => j !== i) })}>✕</button></div>)}
+        {voice.items.map((l, i) => <div key={i} className="flex justify-between border-b border-app py-1"><span>{l.quantity} × {l.name}</span><button className="text-red-600" aria-label="remove" onClick={() => setVoice({ ...voice, items: voice.items.filter((_, j) => j !== i) })}><X size={14} /></button></div>)}
         {voice.unknown.length > 0 && <p className="mt-2 text-sm text-red-600">Not understood: {voice.unknown.join(", ")}</p>}
         <div className="mt-3 flex gap-2"><Button variant="outline" onClick={() => { setVoice(null); startVoice(); }}>Speak again</Button>
           <Button className="flex-1" disabled={!voice.items.length} onClick={() => { setPending((p) => [...p, ...voice.items.map((l) => { const it = menu.items.find((x: any) => x.id === l.menuItemId); const v = it?.variants.find((x: any) => x.id === l.variantId); return { key: Math.random().toString(36).slice(2), menuItemId: l.menuItemId, variantId: l.variantId ?? (it?.variants[0]?.id ?? null), addonIds: [], quantity: l.quantity, name: l.name, unitPrice: priceFor(v ?? it?.variants[0] ?? it, type), taxPercent: it?.taxPercent ?? 5 }; })]); setVoice(null); toast("Added – check and press Send KOT"); }}>Add to order</Button></div>

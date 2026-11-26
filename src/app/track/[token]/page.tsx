@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { Check } from "lucide-react";
 import { use } from "react";
 import { io } from "socket.io-client";
 import { Card } from "@/components/ui";
@@ -17,7 +18,7 @@ export default function Track({ params }: { params: Promise<{ token: string }> }
   return <div className="mx-auto max-w-md p-4"><Card>
     <h1 className="text-xl font-bold">{d.order.branch.restaurant.name}</h1><p className="mb-4 muted">Order #{d.order.orderNo}</p>
     {d.status === "FAILED" ? <p className="text-red-600">{LABEL.FAILED}. Please call {d.order.branch.phone}.</p> :
-      <ol className="space-y-3">{STEPS.map((s, i) => <li key={s} className={`flex items-center gap-3 ${i <= idx ? "" : "opacity-40"}`}><span className={`flex h-7 w-7 items-center justify-center rounded-full text-white ${i <= idx ? "bg-green-600" : "bg-slate-400"}`}>{i <= idx ? "✓" : i + 1}</span>{LABEL[s]}{s === "PENDING" && i === idx && cooking && " – food is being cooked"}</li>)}</ol>}
+      <ol className="space-y-3">{STEPS.map((s, i) => <li key={s} className={`flex items-center gap-3 ${i <= idx ? "" : "opacity-40"}`}><span className={`flex h-7 w-7 items-center justify-center rounded-full text-white ${i <= idx ? "bg-green-600" : "bg-slate-400"}`}>{i <= idx ? <Check size={14} /> : i + 1}</span>{LABEL[s]}{s === "PENDING" && i === idx && cooking && " – food is being cooked"}</li>)}</ol>}
     {d.rider && <p className="mt-4">Rider: <b>{d.rider}</b></p>}
   </Card></div>;
 }

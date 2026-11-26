@@ -18,7 +18,7 @@ export async function seedHistory(p: PrismaClient, rid: string, b1: string, b2: 
   const orders: any[] = [], orderItems: any[] = [], kots: any[] = [], bills: any[] = [], payments: any[] = [], feedback: any[] = [];
   const spend = new Map<string, { total: number; visits: number; last: Date }>();
   let billSeq = 0;
-  for (let d = DAYS; d >= 1; d--) {
+  for (let d = DAYS; d >= 0; d--) {
     for (const [branchId, scale] of [[b1, 1], [b2, 0.5]] as const) {
       const day = new Date(); day.setDate(day.getDate() - d); day.setHours(0, 0, 0, 0);
       const weekend = [0, 5, 6].includes(day.getDay());
@@ -26,6 +26,7 @@ export async function seedHistory(p: PrismaClient, rid: string, b1: string, b2: 
       for (let k = 0; k < n; k++) {
         const hour = pick([8, 9, 12, 13, 13, 14, 14, 15, 19, 20, 20, 21, 21, 22]);
         const at = new Date(day.getTime() + hour * 3600_000 + Math.floor(rnd() * 3600_000));
+        if (at.getTime() > Date.now() - 10 * 60_000) continue; // today: only orders that already happened
         const type = branchId === b1 && rnd() < 0.6 ? "DINE_IN" : pick(["TAKEAWAY", "DELIVERY", "ONLINE"]) as any;
         const id = randomUUID(), kotId = randomUUID();
         const cust = rnd() < 0.45 ? pick(customers) : null;
@@ -63,5 +64,15 @@ export async function seedHistory(p: PrismaClient, rid: string, b1: string, b2: 
   const att: any[] = [];
   for (let d = 14; d >= 1; d--) for (const u of staff) { if (rnd() < 0.15) continue; const day = new Date(); day.setDate(day.getDate() - d); day.setHours(9 + Math.floor(rnd() * 3), Math.floor(rnd() * 60), 0, 0); att.push({ userId: u.id, type: "CLOCK_IN", at: day }, { userId: u.id, type: "CLOCK_OUT", at: new Date(day.getTime() + (7 + rnd() * 3) * 3600_000) }); }
   await p.attendance.createMany({ data: att });
+  // Sold-out events for the dashboard strip: today (so far) and the same weekday last week.
+  const byName = (n: string) => items.find((i) => i.name === n)!;
+  const owner = await p.user.findFirst({ where: { restaurantId: rid, role: "MANAGER" } });
+  const lw = new Date(); lw.setDate(lw.getDate() - 7);
+  const at = (base: Date, h: number, m: number) => { const x = new Date(base); x.setHours(h, m, 0, 0); return x; };
+  const events: [string, Date][] = [["Medu Vada", at(lw, 10, 50)], ["Idli (2 pcs)", at(lw, 11, 5)], ["Qubani Ka Meetha", at(lw, 21, 40)], ["Ghee Roast Dosa", at(lw, 13, 20)]];
+  const nowD = new Date();
+  for (const [n, mins] of [["Medu Vada", 95], ["Idli (2 pcs)", 40]] as const) { const t = new Date(nowD.getTime() - mins * 60_000); if (t.getDate() === nowD.getDate() && t.getHours() >= 7) events.push([n, t]); }
+  for (const [n, t] of events) if (t.toDateString() === nowD.toDateString()) await p.menuItem.update({ where: { id: byName(n).id }, data: { inStock: false } });
+  for (const [n, t] of events) await p.auditLog.create({ data: { restaurantId: rid, branchId: b1, userId: owner?.id, userName: owner?.name, action: "OUT_OF_STOCK", entity: "MenuItem", entityId: byName(n).id, createdAt: t } });
   console.log(`History: ${orders.length} orders, ${feedback.length} ratings`);
 }

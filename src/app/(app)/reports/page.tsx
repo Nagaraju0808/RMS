@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { Download } from "lucide-react";
 import { Button, Card, Input, PageHeader, Select, Tabs } from "@/components/ui";
 import { BarChart } from "@/components/app/Charts";
 import { api, rs } from "@/lib/client";
@@ -32,7 +33,7 @@ function Reports() {
         <Input type="date" aria-label="To" value={f.to} onChange={(e) => setF({ ...f, to: e.target.value })} className="w-40" />
         {[["Today", 1], ["7 days", 7], ["30 days", 30], ["90 days", 90]].map(([l, d]) => <Button key={l} size="sm" variant="outline" onClick={() => preset(d as number)}>{l}</Button>)}
         {me?.user.role === "OWNER" && me.branches.length > 1 && <Select aria-label="Branch" value={f.branch} onChange={(e) => setF({ ...f, branch: e.target.value })} className="w-44"><option value="">All branches</option>{me.branches.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}</Select>}
-        <div className="ml-auto flex gap-2"><a href={`/api/reports/${name}?${qs}&format=xlsx`}><Button variant="outline">⬇ Excel</Button></a><a href={`/api/reports/${name}?${qs}&format=pdf`} target="_blank"><Button variant="outline">⬇ PDF</Button></a></div>
+        <div className="ml-auto flex gap-2"><a href={`/api/reports/${name}?${qs}&format=xlsx`}><Button variant="outline"><Download size={16} />Excel</Button></a><a href={`/api/reports/${name}?${qs}&format=pdf`} target="_blank"><Button variant="outline"><Download size={16} />PDF</Button></a></div>
       </div>
       <Tabs value={name} onChange={setName} options={Object.entries(NAMES).map(([value, label]) => ({ value: value as N, label }))} />
       {err && <p className="text-red-600">{err}</p>}

@@ -1,3 +1,4 @@
+process.env.TZ = process.env.TZ || process.env.APP_TZ || "Asia/Kolkata"; // demo hours are local restaurant hours
 // Demo data: "Spice Garden" restaurant (slug "demo") with two branches and one user per role.
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";

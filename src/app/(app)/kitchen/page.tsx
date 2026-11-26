@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { Bell, BellOff, Maximize } from "lucide-react";
 import { Button } from "@/components/ui";
 import { api } from "@/lib/client";
 import { useApp, useLive } from "@/components/app/AppContext";
@@ -12,9 +13,10 @@ function beep() {
     [0, 0.25].forEach((t) => { const o = ctx.createOscillator(); const g = ctx.createGain(); o.frequency.value = 880; o.connect(g); g.connect(ctx.destination); g.gain.setValueAtTime(0.3, ctx.currentTime + t); o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.18); });
   } catch {}
 }
-const LEVEL: Record<string, string> = { ok: "border-green-600", warn: "border-orange-500", late: "border-red-600 animate-pulse" };
-const HEAD: Record<string, string> = { ok: "bg-green-600", warn: "bg-orange-500", late: "bg-red-600" };
-const ITEM: Record<string, string> = { NEW: "", PREPARING: "bg-orange-100 dark:bg-orange-900/40", READY: "bg-green-100 dark:bg-green-900/40 line-through opacity-70" };
+// On time = calm ink header; only late tickets take a status colour (orange, then red).
+const LEVEL: Record<string, string> = { ok: "border-[var(--border)]", warn: "border-[#c2410c]", late: "border-[var(--negative)] motion-safe:animate-pulse" };
+const HEAD: Record<string, string> = { ok: "bg-[var(--ink-fill)] text-[var(--on-ink)]", warn: "bg-[#c2410c] text-white", late: "bg-[var(--negative)] text-white" };
+const ITEM: Record<string, string> = { NEW: "", PREPARING: "bg-[var(--pill-warning-bg)]", READY: "bg-[var(--pill-positive-bg)] line-through opacity-70" };
 
 export default function KitchenPage() {
   const { me } = useApp();
@@ -35,14 +37,14 @@ export default function KitchenPage() {
   if (!data) return <p className="muted">Loading… {err}</p>;
   const cols = [{ k: "NEW", t: "New" }, { k: "PREPARING", t: "Preparing" }, { k: "READY", t: "Ready" }];
   return (
-    <div className="-m-4 min-h-screen bg-slate-100 p-3 dark:bg-slate-950">
+    <div className="-m-4 min-h-[calc(100vh-3.5rem)] bg-[var(--raised)] p-3 md:-m-6 md:rounded-[var(--radius-sheet)] md:p-4">
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <h1 className="mr-2 text-2xl font-bold">Kitchen</h1>
         {[{ id: "", name: "All stations" }, ...data.stations].map((s) => (
-          <button key={s.id} onClick={() => { setStation(s.id); try { localStorage.setItem("kds_station", s.id); } catch {} }} className={cn("rounded-lg px-4 py-2 text-base font-semibold", station === s.id ? "bg-brand-600 text-white" : "bg-white dark:bg-slate-800")}>{s.name}</button>))}
+          <button key={s.id} onClick={() => { setStation(s.id); try { localStorage.setItem("kds_station", s.id); } catch {} }} className={cn("rounded-lg px-4 py-2 text-base font-semibold", station === s.id ? "bg-[var(--ink-fill)] text-[var(--on-ink)]" : "bg-[var(--surface)]")}>{s.name}</button>))}
         <div className="ml-auto flex gap-2">
-          <Button variant="outline" onClick={() => { setSound(!sound); if (!sound) beep(); }}>{sound ? "🔔 Sound on" : "🔕 Sound off"}</Button>
-          <Button variant="outline" onClick={() => document.documentElement.requestFullscreen?.()}>⛶ Full screen</Button>
+          <Button variant="outline" onClick={() => { setSound(!sound); if (!sound) beep(); }}>{sound ? <><Bell size={16} />Sound on</> : <><BellOff size={16} />Sound off</>}</Button>
+          <Button variant="outline" onClick={() => document.documentElement.requestFullscreen?.()}><Maximize size={16} />Full screen</Button>
         </div>
       </div>
       {err && <p className="mb-2 text-red-600">{err}</p>}
@@ -57,8 +59,8 @@ export default function KitchenPage() {
                   const level = c.k === "READY" ? "ok" : timerLevel(k.createdAt, now, warn, late);
                   const mins = Math.floor((now.getTime() - new Date(k.createdAt).getTime()) / 60000);
                   return (
-                    <div key={k.id} data-testid="kot" className={cn("overflow-hidden rounded-xl border-4 bg-white shadow dark:bg-slate-900", LEVEL[level])}>
-                      <div className={cn("flex items-center justify-between px-3 py-2 text-white", HEAD[level])}>
+                    <div key={k.id} data-testid="kot" className={cn("overflow-hidden rounded-xl border-2 bg-[var(--surface)]", LEVEL[level])}>
+                      <div className={cn("flex items-center justify-between px-3 py-2", HEAD[level])}>
                         <span className="text-xl font-bold">{k.order.table?.name ?? (k.order.tokenNo ? `Token ${k.order.tokenNo}` : k.order.customerName || k.order.type)}</span>
                         <span className="text-sm">#{k.order.orderNo} · KOT {k.kotNo} · {k.order.type.replace("_", "-")}{k.order.source !== "POS" ? ` · ${k.order.source}` : ""}</span>
                         <span className="text-xl font-bold tabular-nums">{mins}m</span>
@@ -70,7 +72,7 @@ export default function KitchenPage() {
                               className={cn("flex w-full items-start justify-between gap-2 px-3 py-3 text-left text-lg", ITEM[i.status], i.status === "CANCELLED" && "text-red-600 line-through")}>
                               <span><b className="mr-1">{i.quantity}×</b>{i.name}
                                 {(i.addons as any[]).length > 0 && <span className="block text-sm muted">+ {(i.addons as any[]).map((a) => a.name).join(", ")}</span>}
-                                {i.notes && <span className="block text-base font-semibold text-red-600">⚠ {i.notes}</span>}
+                                {i.notes && <span className="block text-base font-semibold text-red-600">Note: {i.notes}</span>}
                                 {i.status === "CANCELLED" && <span className="block text-sm">CANCELLED: {i.cancelReason}</span>}</span>
                               <span className="shrink-0 text-xs uppercase muted">{i.status}</span>
                             </button>
@@ -84,7 +86,7 @@ export default function KitchenPage() {
                       </div>
                     </div>);
                 })}
-                {!kots.length && <p className="rounded-xl border-2 border-dashed border-slate-300 p-6 text-center muted">Nothing here</p>}
+                {!kots.length && <p className="rounded-xl bg-[var(--surface)] p-6 text-center muted">Nothing here</p>}
               </div>
             </div>);
         })}

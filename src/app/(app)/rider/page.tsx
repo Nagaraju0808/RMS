@@ -3,7 +3,7 @@ import * as React from "react";
 import { Badge, Button, Card, useToast } from "@/components/ui";
 import { api, rs } from "@/lib/client";
 import { useLive } from "@/components/app/AppContext";
-const NEXT: Record<string, [string, string]> = { ASSIGNED: ["PICKED_UP", "Picked up from restaurant"], PICKED_UP: ["ON_THE_WAY", "Start ride"], ON_THE_WAY: ["DELIVERED", "Delivered ✓"] };
+const NEXT: Record<string, [string, string]> = { ASSIGNED: ["PICKED_UP", "Picked up from restaurant"], PICKED_UP: ["ON_THE_WAY", "Start ride"], ON_THE_WAY: ["DELIVERED", "Delivered"] };
 export default function RiderPage() {
   const [list, setList] = React.useState<any[]>([]);
   const { toast, node } = useToast();

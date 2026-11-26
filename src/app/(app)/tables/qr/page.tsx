@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { Printer } from "lucide-react";
 import { Button, PageHeader } from "@/components/ui";
 import { api } from "@/lib/client";
 export default function QrSheet() {
@@ -7,7 +8,7 @@ export default function QrSheet() {
   const load = () => api("/api/tables/qr").then(setList);
   React.useEffect(() => { load(); }, []);
   return <div>
-    <div className="no-print"><PageHeader title="Table QR codes"><Button onClick={() => window.print()}>🖨 Print sheet</Button>
+    <div className="no-print"><PageHeader title="Table QR codes"><Button onClick={() => window.print()}><Printer size={16} />Print sheet</Button>
       <Button variant="outline" onClick={() => confirm("Make new QR codes? Old printed codes will stop working.") && api("/api/tables/qr", { method: "POST" }).then(load)}>Regenerate all</Button></PageHeader>
       <p className="mb-3 text-sm muted">Customers scan the code on their table to see the menu and order. Right-click a code to save it as an image.</p></div>
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 print:grid-cols-3">

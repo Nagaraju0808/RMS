@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { Trash2, X } from "lucide-react";
 import { Badge, Button, Card, Dialog, Input, Label, PageHeader, Select, Table, Tabs, Textarea, useToast } from "@/components/ui";
 import { api, rs } from "@/lib/client";
 import { useApp } from "@/components/app/AppContext";
@@ -32,12 +33,12 @@ export default function MenuPage() {
         <Input placeholder="Search items…" value={q} onChange={(e) => setQ(e.target.value)} className="mb-3 max-w-sm" />
         <Table head={["", "Item", "Category", "Dine-in", "Takeaway", "Online", "Variants", "In stock", ""]} rows={items.map((i: any) => [
           <FoodDot t={i.foodType} key="f" />,
-          <div key="n"><div className="font-medium">{i.name}</div><div className="text-xs muted">{"🌶".repeat(i.spiceLevel)} {i.allergens.join(", ")}</div></div>,
+          <div key="n"><div className="font-medium">{i.name}</div><div className="text-xs muted">{i.spiceLevel ? `Spice ${i.spiceLevel}/3` : ""}{i.spiceLevel && i.allergens.length ? " · " : ""}{i.allergens.join(", ")}</div></div>,
           catName(i.categoryId), rs(i.priceDineIn), i.priceTakeaway != null ? rs(i.priceTakeaway) : "–", i.priceOnline != null ? rs(i.priceOnline) : "–",
           i.variants.map((v: any) => v.name).join(", ") || "–",
           <button key="s" aria-label={`Toggle stock ${i.name}`} onClick={() => run(() => api(`/api/menu/items/${i.id}`, { method: "PATCH", body: { inStock: !i.inStock } }), i.inStock ? "Marked out of stock" : "Back in stock")}
             className={`rounded-full px-3 py-1 text-xs font-semibold ${i.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>{i.inStock ? "In stock" : "Out of stock"}</button>,
-          canManage ? <div key="a" className="flex gap-1"><Button size="sm" variant="outline" onClick={() => setEdit(i)}>Edit</Button><Button size="sm" variant="ghost" onClick={() => confirm(`Delete ${i.name}?`) && run(() => api(`/api/menu/items/${i.id}`, { method: "DELETE" }), "Deleted")}>🗑</Button></div> : null,
+          canManage ? <div key="a" className="flex gap-1"><Button size="sm" variant="outline" onClick={() => setEdit(i)}>Edit</Button><Button size="sm" variant="ghost" onClick={() => confirm(`Delete ${i.name}?`) && run(() => api(`/api/menu/items/${i.id}`, { method: "DELETE" }), "Deleted")}aria-label={`Delete ${i.name}`}><Trash2 size={15} /></Button></div> : null,
         ])} />
       </>}
 
@@ -53,7 +54,7 @@ export default function MenuPage() {
                 <option value="">No station</option>{m.stations.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}</Select>
               <Input className="w-40" placeholder="తెలుగు name" defaultValue={c.nameI18n?.te || ""} onBlur={(e) => run(() => api(`/api/menu/categories/${c.id}`, { method: "PUT", body: { nameI18n: { ...c.nameI18n, te: e.target.value } } }))} />
               <Input className="w-40" placeholder="हिंदी name" defaultValue={c.nameI18n?.hi || ""} onBlur={(e) => run(() => api(`/api/menu/categories/${c.id}`, { method: "PUT", body: { nameI18n: { ...c.nameI18n, hi: e.target.value } } }))} />
-              <Button size="sm" variant="ghost" onClick={() => run(() => api(`/api/menu/categories/${c.id}`, { method: "DELETE" }))}>🗑</Button>
+              <Button size="sm" variant="ghost" aria-label={`Delete ${c.name}`} onClick={() => run(() => api(`/api/menu/categories/${c.id}`, { method: "DELETE" }))}><Trash2 size={15} /></Button>
             </>}
           </div>))}</div>
         {canManage && <form className="mt-4 flex gap-2" onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget); run(() => api("/api/menu/stations", { body: { name: f.get("name") } })); e.currentTarget.reset(); }}>
@@ -104,7 +105,7 @@ function ItemEditor({ m, item, onClose, onSaved }: any) {
         <div><Label>Takeaway price (₹, blank = same)</Label><Input type="number" step="0.01" value={toR(f.priceTakeaway)} onChange={(e) => set("priceTakeaway", toP(e.target.value))} /></div>
         <div><Label>Online price (₹, blank = same)</Label><Input type="number" step="0.01" value={toR(f.priceOnline)} onChange={(e) => set("priceOnline", toP(e.target.value))} /></div>
         <div><Label>Food type</Label><Select value={f.foodType} onChange={(e) => set("foodType", e.target.value)}><option value="VEG">Veg</option><option value="NON_VEG">Non-veg</option><option value="EGG">Egg</option><option value="VEGAN">Vegan</option></Select></div>
-        <div><Label>Spice level</Label><Select value={f.spiceLevel} onChange={(e) => set("spiceLevel", e.target.value)}>{[0, 1, 2, 3].map((n) => <option key={n} value={n}>{n === 0 ? "Not spicy" : "🌶".repeat(n)}</option>)}</Select></div>
+        <div><Label>Spice level</Label><Select value={f.spiceLevel} onChange={(e) => set("spiceLevel", e.target.value)}>{[0, 1, 2, 3].map((n) => <option key={n} value={n}>{n === 0 ? "Not spicy" : ["", "Mild", "Medium", "Hot"][n]}</option>)}</Select></div>
         <div><Label>Allergens (comma separated)</Label><Input value={f.allergensText} onChange={(e) => set("allergensText", e.target.value)} placeholder="dairy, nuts, gluten" /></div>
         <div><Label>Tax</Label><Select value={f.taxRateId || ""} onChange={(e) => set("taxRateId", e.target.value)}><option value="">Default</option>{m.taxRates.map((t: any) => <option key={t.id} value={t.id}>{t.name}</option>)}</Select></div>
         <div><Label>Kitchen station</Label><Select value={f.stationId || ""} onChange={(e) => set("stationId", e.target.value)}><option value="">From category</option>{m.stations.map((t: any) => <option key={t.id} value={t.id}>{t.name}</option>)}</Select></div>
@@ -115,7 +116,7 @@ function ItemEditor({ m, item, onClose, onSaved }: any) {
           <div key={i} className="mb-2 flex gap-2">
             <Input placeholder="Name" value={v.name} onChange={(e) => { const vs = [...f.variants]; vs[i] = { ...v, name: e.target.value }; set("variants", vs); }} />
             <Input placeholder="Price ₹" type="number" value={toR(v.priceDineIn)} onChange={(e) => { const vs = [...f.variants]; vs[i] = { ...v, priceDineIn: toP(e.target.value) ?? 0 }; set("variants", vs); }} />
-            <Button variant="ghost" onClick={() => set("variants", f.variants.filter((_: any, j: number) => j !== i))}>✕</Button>
+            <Button variant="ghost" aria-label="Remove size" onClick={() => set("variants", f.variants.filter((_: any, j: number) => j !== i))}><X size={16} /></Button>
           </div>))}
         <Button size="sm" variant="outline" onClick={() => set("variants", [...f.variants, { name: "", priceDineIn: f.priceDineIn }])}>+ Variant</Button>
       </div>
@@ -136,7 +137,7 @@ function AddonGroups({ m, run, canManage }: any) {
     {m.addonGroups.map((x: any) => (
       <div key={x.id} className="mb-2 flex items-center justify-between border-b border-app pb-2">
         <div><b>{x.name}</b> <span className="text-xs muted">(choose {x.minSelect}–{x.maxSelect})</span><div className="text-sm muted">{x.addons.map((a: any) => `${a.name} ${rs(a.price)}`).join(" · ")}</div></div>
-        {canManage && <div className="flex gap-1"><Button size="sm" variant="outline" onClick={() => setG(x)}>Edit</Button><Button size="sm" variant="ghost" onClick={() => run(() => api(`/api/menu/addon-groups/${x.id}`, { method: "DELETE" }))}>🗑</Button></div>}
+        {canManage && <div className="flex gap-1"><Button size="sm" variant="outline" onClick={() => setG(x)}>Edit</Button><Button size="sm" variant="ghost" aria-label="Delete group" onClick={() => run(() => api(`/api/menu/addon-groups/${x.id}`, { method: "DELETE" }))}><Trash2 size={15} /></Button></div>}
       </div>))}
     {g && <Dialog open onClose={() => setG(null)} title="Add-on group">
       <div className="space-y-2">
@@ -162,7 +163,7 @@ function Combos({ m, run, canManage }: any) {
       <p className="text-xs muted">Hold Ctrl / Cmd to choose several items.</p>
     </form>}
     {m.combos.map((c: any) => <div key={c.id} className="flex justify-between border-b border-app py-2"><span><b>{c.name}</b> – {rs(c.price)} · {c.items.map((ci: any) => m.items.find((i: any) => i.id === ci.menuItemId)?.name).join(" + ")}</span>
-      {canManage && <Button size="sm" variant="ghost" onClick={() => run(() => api(`/api/menu/combos/${c.id}`, { method: "DELETE" }))}>🗑</Button>}</div>)}
+      {canManage && <Button size="sm" variant="ghost" aria-label="Delete combo" onClick={() => run(() => api(`/api/menu/combos/${c.id}`, { method: "DELETE" }))}><Trash2 size={15} /></Button>}</div>)}
   </Card>;
 }
 
@@ -172,7 +173,7 @@ function Schedules({ m, run, canManage }: any) {
       <Input name="name" placeholder="Breakfast / Happy hour" required className="w-48" /><Input name="start" type="time" required className="w-32" /><Input name="end" type="time" required className="w-32" />
       <Input name="disc" type="number" placeholder="Discount % (happy hour)" className="w-48" /><Button>Add</Button></form>}
     {m.schedules.map((s: any) => <div key={s.id} className="flex justify-between border-b border-app py-2"><span><b>{s.name}</b> {s.startTime}–{s.endTime} {s.discountPercent > 0 && <Badge color="orange">{s.discountPercent}% off</Badge>}</span>
-      {canManage && <Button size="sm" variant="ghost" onClick={() => run(() => api(`/api/menu/schedules/${s.id}`, { method: "DELETE" }))}>🗑</Button>}</div>)}
+      {canManage && <Button size="sm" variant="ghost" aria-label="Delete time menu" onClick={() => run(() => api(`/api/menu/schedules/${s.id}`, { method: "DELETE" }))}><Trash2 size={15} /></Button>}</div>)}
     <p className="mt-2 text-sm muted">Tick a time menu inside an item to show it only at those times.</p>
   </Card>;
 }

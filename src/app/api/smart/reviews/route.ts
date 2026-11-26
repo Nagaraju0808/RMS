@@ -8,6 +8,6 @@ export const GET = handler(async () => {
   const branchIds = (await prisma.branch.findMany({ where: { restaurantId: s.restaurantId }, select: { id: true } })).map((b) => b.id);
   const fb = await prisma.feedback.findMany({ where: { branchId: { in: branchIds }, createdAt: { gte: new Date(Date.now() - 30 * 86400_000) } }, select: { rating: true, comment: true } });
   const basic = summarizeReviewsBasic(fb);
-  const ai = await getAI().summarizeReviews(fb.filter((f) => f.comment).map((f) => `${f.rating}★ ${f.comment}`));
+  const ai = await getAI().summarizeReviews(fb.filter((f) => f.comment).map((f) => `${f.rating}/5: ${f.comment}`));
   return ok({ ...basic, aiPoints: ai, aiUsed: !!ai });
 });

@@ -40,27 +40,27 @@ export function can(role: string, perm: Permission, extra: string[] = []): boole
   return (PERMISSIONS[perm] as readonly string[]).includes(role);
 }
 
-export type NavItem = { href: string; label: string; perm: Permission; feature?: string; icon: string };
+export type NavItem = { href: string; label: string; perm: Permission; feature?: string; icon: string; group: "Service" | "Guests" | "Back office" | "You" };
 export const NAV: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", perm: "reports.view", icon: "LayoutDashboard" },
-  { href: "/pos", label: "POS", perm: "orders.create", icon: "ShoppingCart" },
-  { href: "/waiter", label: "Waiter", perm: "orders.create", feature: "tables", icon: "Smartphone" },
-  { href: "/tables", label: "Tables", perm: "tables.view", feature: "tables", icon: "LayoutGrid" },
-  { href: "/orders", label: "Orders", perm: "orders.view", icon: "ClipboardList" },
-  { href: "/kitchen", label: "Kitchen", perm: "kitchen.view", icon: "ChefHat" },
-  { href: "/billing", label: "Billing", perm: "billing.manage", icon: "Receipt" },
-  { href: "/reservations", label: "Reservations", perm: "reservations.manage", feature: "reservations", icon: "CalendarDays" },
-  { href: "/deliveries", label: "Deliveries", perm: "delivery.manage", feature: "delivery", icon: "Bike" },
-  { href: "/rider", label: "My deliveries", perm: "delivery.ride", icon: "Bike" },
-  { href: "/menu", label: "Menu", perm: "menu.view", icon: "UtensilsCrossed" },
-  { href: "/inventory", label: "Inventory", perm: "inventory.view", feature: "inventory", icon: "Package" },
-  { href: "/customers", label: "Customers", perm: "customers.manage", icon: "Users" },
-  { href: "/staff", label: "Staff", perm: "staff.manage", icon: "UserCog" },
-  { href: "/me", label: "My shift", perm: "staff.self", icon: "Clock" },
-  { href: "/reports", label: "Reports", perm: "reports.view", icon: "BarChart3" },
-  { href: "/smart", label: "Smart insights", perm: "ai.use", icon: "Sparkles" },
-  { href: "/audit", label: "Audit log", perm: "audit.view", icon: "ShieldCheck" },
-  { href: "/settings", label: "Settings", perm: "settings.manage", icon: "Settings" },
+  { href: "/dashboard", label: "Dashboard", perm: "reports.view", icon: "LayoutDashboard", group: "Service" },
+  { href: "/pos", label: "POS", perm: "orders.create", icon: "ShoppingCart", group: "Service" },
+  { href: "/waiter", label: "Waiter", perm: "orders.create", feature: "tables", icon: "Smartphone", group: "Service" },
+  { href: "/tables", label: "Tables", perm: "tables.view", feature: "tables", icon: "LayoutGrid", group: "Service" },
+  { href: "/orders", label: "Orders", perm: "orders.view", icon: "ClipboardList", group: "Service" },
+  { href: "/kitchen", label: "Kitchen", perm: "kitchen.view", icon: "ChefHat", group: "Service" },
+  { href: "/billing", label: "Billing", perm: "billing.manage", icon: "Receipt", group: "Service" },
+  { href: "/reservations", label: "Reservations", perm: "reservations.manage", feature: "reservations", icon: "CalendarDays", group: "Guests" },
+  { href: "/deliveries", label: "Deliveries", perm: "delivery.manage", feature: "delivery", icon: "Bike", group: "Guests" },
+  { href: "/rider", label: "My deliveries", perm: "delivery.ride", icon: "Bike", group: "Guests" },
+  { href: "/menu", label: "Menu", perm: "menu.view", icon: "UtensilsCrossed", group: "Back office" },
+  { href: "/inventory", label: "Inventory", perm: "inventory.view", feature: "inventory", icon: "Package", group: "Back office" },
+  { href: "/customers", label: "Customers", perm: "customers.manage", icon: "Users", group: "Guests" },
+  { href: "/staff", label: "Staff", perm: "staff.manage", icon: "UserCog", group: "Back office" },
+  { href: "/me", label: "My shift", perm: "staff.self", icon: "Clock", group: "You" },
+  { href: "/reports", label: "Reports", perm: "reports.view", icon: "BarChart3", group: "Back office" },
+  { href: "/smart", label: "Smart insights", perm: "ai.use", icon: "Sparkles", group: "Back office" },
+  { href: "/audit", label: "Audit log", perm: "audit.view", icon: "ShieldCheck", group: "Back office" },
+  { href: "/settings", label: "Settings", perm: "settings.manage", icon: "Settings", group: "Back office" },
 ];
 
 export function navForRole(role: string, features: Record<string, boolean>, extra: string[] = []) {

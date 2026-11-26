@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { X } from "lucide-react";
 import { Badge, Button, Card, Dialog, Input, Label, PageHeader, Select, Table, Tabs, useToast } from "@/components/ui";
 import { api, rs } from "@/lib/client";
 import { formatQty } from "@/lib/inventory";
@@ -76,7 +77,7 @@ function RecipesTab({ stock, run, canManage }: any) {
         <Input className="w-24" type="number" step="0.001" value={l.quantity} onChange={(e) => setLines(lines.map((x, j) => (j === i ? { ...x, quantity: Number(e.target.value) } : x)))} />
         <Select className="w-20" value={l.unit} onChange={(e) => setLines(lines.map((x, j) => (j === i ? { ...x, unit: e.target.value } : x)))}>{(UNITS[ing?.unit] || ["G"]).map((u) => <option key={u}>{u}</option>)}</Select>
         {sel.variants.length > 0 && <Select className="w-32" value={l.variantId || ""} onChange={(e) => setLines(lines.map((x, j) => (j === i ? { ...x, variantId: e.target.value || null } : x)))}><option value="">All sizes</option>{sel.variants.map((v: any) => <option key={v.id} value={v.id}>{v.name}</option>)}</Select>}
-        <Button variant="ghost" onClick={() => setLines(lines.filter((_, j) => j !== i))}>✕</Button></div>; })}
+        <Button variant="ghost" aria-label="Remove line" onClick={() => setLines(lines.filter((_, j) => j !== i))}><X size={16} /></Button></div>; })}
       {canManage && <div className="flex gap-2"><Button variant="outline" onClick={() => stock[0] && setLines([...lines, { ingredientId: stock[0].id, quantity: 100, unit: UNITS[stock[0].unit][1], variantId: null }])}>+ Ingredient</Button>
         <Button onClick={() => run(api(`/api/recipes/${sel.id}`, { method: "PUT", body: { lines: lines.map((l) => ({ ingredientId: l.ingredientId, quantity: l.quantity, unit: l.unit, variantId: l.variantId || null })) } }), "Recipe saved")}>Save recipe</Button></div>}
       <p className="text-sm muted">Stock goes down automatically by this recipe each time the dish is sent to the kitchen, and comes back if it is cancelled.</p>

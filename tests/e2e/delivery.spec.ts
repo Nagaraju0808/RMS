@@ -26,7 +26,7 @@ test("online delivery order → assign rider → rider delivers → customer tra
   const card = rider.locator(".card").filter({ hasText: "Asha" }).first();
   await card.getByRole("button", { name: "Picked up from restaurant" }).click();
   await card.getByRole("button", { name: "Start ride" }).click();
-  await card.getByRole("button", { name: "Delivered ✓" }).click();
+  await card.getByRole("button", { name: "Delivered" }).click();
   await expect(cust.getByText("Rider: Suresh Rider")).toBeVisible({ timeout: 25000 });
 });
 test("online table booking", async ({ page }) => {
@@ -34,5 +34,5 @@ test("online table booking", async ({ page }) => {
   await page.locator("input[name=name]").fill("Ravi K");
   await page.locator("input[name=phone]").fill("9123456780");
   await page.getByRole("button", { name: "Book" }).click();
-  await expect(page.getByText("Booked! ✓")).toBeVisible();
+  await expect(page.getByText("Your table is booked")).toBeVisible();
 });

@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { X } from "lucide-react";
 import { Badge, Button, Card, Input, Label, PageHeader, Select, useToast } from "@/components/ui";
 import { api } from "@/lib/client";
 import { RESTAURANT_TYPES } from "@/lib/features";
@@ -27,7 +28,7 @@ export default function SettingsPage() {
         <h2 className="mb-2 font-semibold">Tax rates (GST)</h2>
         <div className="mb-3 flex flex-wrap gap-2">{d.taxRates.map((t: any) => (
           <Badge key={t.id} color={t.isDefault ? "green" : "slate"}>{t.name} · {t.ratePercent}% {t.hsnSac && `· HSN/SAC ${t.hsnSac}`}
-            <button className="ml-2" aria-label={`Delete ${t.name}`} onClick={() => save(`/api/tax-rates/${t.id}`, undefined, "DELETE")}>✕</button></Badge>))}</div>
+            <button className="ml-2" aria-label={`Delete ${t.name}`} onClick={() => save(`/api/tax-rates/${t.id}`, undefined, "DELETE")}><X size={12} /></button></Badge>))}</div>
         <form className="flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget); save("/api/tax-rates", { name: f.get("name"), ratePercent: Number(f.get("rate")), hsnSac: f.get("hsn") || undefined }, "POST"); e.currentTarget.reset(); }}>
           <Input name="name" placeholder="Name e.g. GST 12%" className="w-48" required /><Input name="rate" type="number" step="0.01" placeholder="%" className="w-24" required /><Input name="hsn" placeholder="HSN/SAC" className="w-32" /><Button>Add</Button>
         </form>

@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { X } from "lucide-react";
 import { Button, Card, Input, Label, Select } from "@/components/ui";
 import { api } from "@/lib/client";
 import { RESTAURANT_TYPES, defaultFeatures, RestaurantTypeName } from "@/lib/features";
@@ -45,7 +46,7 @@ export default function Onboarding() {
             <div key={i} className="flex gap-2">
               <Input aria-label="Branch name" placeholder="Branch name" value={b.name} onChange={(e) => { const br = [...f.branches]; br[i] = { ...b, name: e.target.value }; setF({ ...f, branches: br }); }} />
               <Input aria-label="Address" placeholder="Address" value={b.address} onChange={(e) => { const br = [...f.branches]; br[i] = { ...b, address: e.target.value }; setF({ ...f, branches: br }); }} />
-              {f.branches.length > 1 && <Button variant="ghost" onClick={() => setF({ ...f, branches: f.branches.filter((_, j) => j !== i) })}>✕</Button>}
+              {f.branches.length > 1 && <Button variant="ghost" aria-label="Remove branch" onClick={() => setF({ ...f, branches: f.branches.filter((_, j) => j !== i) })}><X size={16} /></Button>}
             </div>
           ))}
           <Button variant="outline" onClick={() => setF({ ...f, branches: [...f.branches, { name: "", address: "" }] })}>+ Add branch</Button>

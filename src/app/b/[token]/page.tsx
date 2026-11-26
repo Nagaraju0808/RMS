@@ -25,9 +25,9 @@ export default function PublicBill({ params }: { params: Promise<{ token: string
     <div className="mx-auto max-w-md p-4">
       <h1 className="mb-2 text-xl font-bold">{b.restaurant}</h1>
       <Card><pre className="overflow-x-auto whitespace-pre font-mono text-xs">{b.receipt}</pre></Card>
-      {b.paid < b.total ? <Button size="lg" className="mt-4 w-full" onClick={pay}>Pay {rs(b.total - b.paid)} online</Button> : <p className="mt-4 rounded-lg bg-green-100 p-3 text-center font-semibold text-green-800">Paid ✓</p>}
+      {b.paid < b.total ? <Button size="lg" className="mt-4 w-full" onClick={pay}>Pay {rs(b.total - b.paid)} online</Button> : <p className="mt-4 rounded-lg bg-green-100 p-3 text-center font-semibold text-green-800">Paid in full</p>}
       {msg && <p className="mt-2 text-center text-green-700">{msg}</p>}
-      <a href={`/t/feedback?order=${b.orderId}`} className="mt-4 block text-center text-brand-600">Rate your meal ⭐</a>
+      <a href={`/t/feedback?order=${b.orderId}`} className="mt-4 block text-center text-brand-600">Rate your meal</a>
     </div>
   );
 }

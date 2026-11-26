@@ -86,3 +86,21 @@
     review bullet points. If the AI call fails, the rule-based text is shown.
 50. **Voice ordering** uses the browser's speech recognition (en-IN); browsers without it get a typed box. The parsed
     items are shown for the waiter to confirm, then added to the cart – nothing is sent to the kitchen automatically.
+
+## Design pass (design-taste-frontend skill, app-screen rules)
+51. **Style "Framed sheet"** (dealt by the skill, seed 686121829): sidebar + 48px top bar share one tinted frame; the work
+    sits on a white sheet (8px inset, 16px corners, 1px edge, no shadow). Chosen because staff use DineFlow in long
+    sessions across many screens; the frame holds the restaurant / branch scope, the sheet keeps the work calm.
+52. **Face**: the frame is tinted banana-leaf green-grey (#f3f6f1) and the mark is a drawn banana leaf (the South Indian
+    serving leaf). Typeface IBM Plex Sans (self-hosted via next/font, so it also works offline). Data hue teal #1b6c80;
+    primary actions near-black; status colours (green/red/amber) only for status. Dark mode has its own token set.
+53. **Signature element**: "Sold out today" strip on the dashboard – when each dish was switched to out-of-stock today
+    against the same weekday last week (from the audit log).
+54. **Dashboard** answers "How is today's service going?": a one-line finding under the title, live service counts,
+    KPIs as the chart's tabs (running totals, today vs same weekday last week), top dishes, sold-out strip.
+55. **No emoji in the UI** (icons from lucide or plain words); no gradients, no shadows at rest, underline tabs, tables
+    are rules + right-aligned numbers. Kitchen tickets on time use a calm ink header; only late tickets turn orange/red.
+56. **Bug fixed during the pass**: hourly/daily report buckets used UTC; SQL now converts to restaurant time
+    (`src/lib/sql-tz.ts`). The demo seed also runs in restaurant time.
+57. **Demo login link** `/api/auth/demo?as=owner&next=/dashboard` exists only for screenshots/checks: off unless
+    `DEMO_LOGIN=1`, and never in production.

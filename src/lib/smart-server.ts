@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { localTs } from "@/lib/sql-tz";
 import { prisma } from "./db";
 import { coOccurrence, forecastItem, trendPercent } from "./smart";
 import { usageFor, Unit } from "./inventory";
@@ -7,7 +8,7 @@ import { usageFor, Unit } from "./inventory";
 export async function dailyItemSales(branchIds: string[], days = 56) {
   const since = new Date(); since.setHours(0, 0, 0, 0); since.setDate(since.getDate() - days);
   return prisma.$queryRaw<{ id: string; name: string; date: string; qty: number }[]>`
-    SELECT oi."menuItemId" AS id, m.name, to_char(o."createdAt", 'YYYY-MM-DD') AS date, SUM(oi.quantity)::int AS qty
+    SELECT oi."menuItemId" AS id, m.name, to_char(${localTs('o."createdAt"')}, 'YYYY-MM-DD') AS date, SUM(oi.quantity)::int AS qty
     FROM "OrderItem" oi JOIN "Order" o ON o.id = oi."orderId" JOIN "MenuItem" m ON m.id = oi."menuItemId"
     WHERE o."branchId" IN (${Prisma.join(branchIds)}) AND o.status = 'PAID' AND oi.status <> 'CANCELLED' AND o."createdAt" >= ${since}
     GROUP BY 1, 2, 3`;

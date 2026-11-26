@@ -1,5 +1,6 @@
 // All reports. Each returns { title, columns, rows } so the screen, Excel and PDF use the same data.
 import { Prisma } from "@prisma/client";
+import { localTs } from "@/lib/sql-tz";
 import { prisma } from "./db";
 import { Report, fillHours, sumBy, menuClass } from "./report-utils";
 import { dishCost, Unit } from "./inventory";
@@ -9,7 +10,7 @@ const bIn = (s: Scope) => Prisma.join(s.branchIds);
 const n = (v: any) => Number(v ?? 0);
 
 async function sales(s: Scope): Promise<Report> {
-  const rows = await prisma.$queryRaw<any[]>`SELECT to_char(b."createdAt", 'YYYY-MM-DD') AS day, COUNT(*)::int AS bills, SUM(b.subtotal)::bigint AS gross, SUM(b.discount)::bigint AS discount, SUM(b.cgst + b.sgst + b.igst)::bigint AS tax, SUM(b.total)::bigint AS total
+  const rows = await prisma.$queryRaw<any[]>`SELECT to_char(${localTs('b."createdAt"')}, 'YYYY-MM-DD') AS day, COUNT(*)::int AS bills, SUM(b.subtotal)::bigint AS gross, SUM(b.discount)::bigint AS discount, SUM(b.cgst + b.sgst + b.igst)::bigint AS tax, SUM(b.total)::bigint AS total
     FROM "Bill" b WHERE b."branchId" IN (${bIn(s)}) AND b.status IN ('PAID','PARTIALLY_PAID','REFUNDED') AND b."createdAt" >= ${s.from} AND b."createdAt" < ${s.to} GROUP BY 1 ORDER BY 1`;
   const r = rows.map((x) => ({ day: x.day, bills: n(x.bills), gross: n(x.gross), discount: n(x.discount), tax: n(x.tax), total: n(x.total), avgBill: x.bills ? Math.round(n(x.total) / n(x.bills)) : 0 }));
   const columns = [{ key: "day", label: "Date" }, { key: "bills", label: "Bills", type: "number" }, { key: "gross", label: "Item sales", type: "money" }, { key: "discount", label: "Discounts", type: "money" }, { key: "tax", label: "Tax", type: "money" }, { key: "total", label: "Total", type: "money" }, { key: "avgBill", label: "Avg bill", type: "money" }] as Report["columns"];
@@ -31,7 +32,7 @@ async function categories(s: Scope): Promise<Report> {
   return { title: "Category-wise sales", columns: [{ key: "category", label: "Category" }, { key: "qty", label: "Qty", type: "number" }, { key: "revenue", label: "Revenue", type: "money" }, { key: "share", label: "Share", type: "percent" }], rows: rows.map((x) => ({ category: x.category, qty: n(x.qty), revenue: n(x.revenue), share: total ? Math.round((n(x.revenue) / total) * 1000) / 10 : 0 })), chart: { x: "category", y: "revenue", kind: "bar" } };
 }
 async function hourly(s: Scope): Promise<Report> {
-  const rows = await prisma.$queryRaw<any[]>`SELECT EXTRACT(HOUR FROM o."createdAt")::int AS hour, COUNT(*)::int AS orders, COALESCE(SUM(b.total),0)::bigint AS sales
+  const rows = await prisma.$queryRaw<any[]>`SELECT EXTRACT(HOUR FROM ${localTs('o."createdAt"')})::int AS hour, COUNT(*)::int AS orders, COALESCE(SUM(b.total),0)::bigint AS sales
     FROM "Order" o LEFT JOIN "Bill" b ON b."orderId" = o.id AND b.status = 'PAID' WHERE o."branchId" IN (${bIn(s)}) AND o.status = 'PAID' AND o."createdAt" >= ${s.from} AND o."createdAt" < ${s.to} GROUP BY 1`;
   const days = Math.round((s.to.getTime() - s.from.getTime()) / 86400_000);
   return { title: "Busy hours", columns: [{ key: "hour", label: "Hour" }, { key: "orders", label: "Orders", type: "number" }, { key: "avgOrdersPerDay", label: "Avg orders / day", type: "number" }, { key: "sales", label: "Sales", type: "money" }], rows: fillHours(rows, days), chart: { x: "hour", y: "orders", kind: "bar" } };
@@ -45,16 +46,16 @@ async function payments(s: Scope): Promise<Report> {
   return { title: "Payment modes", columns: cols, rows: r, chart: { x: "mode", y: "amount", kind: "bar" }, totals: sumBy(r, cols) };
 }
 async function discounts(s: Scope): Promise<Report> {
-  const rows = await prisma.$queryRaw<any[]>`SELECT to_char(b."createdAt", 'YYYY-MM-DD') AS day, o."orderNo", COALESCE(o."couponCode", o."discountReason", '') AS reason, u.name AS staff, b.subtotal, b.discount
+  const rows = await prisma.$queryRaw<any[]>`SELECT to_char(${localTs('b."createdAt"')}, 'YYYY-MM-DD') AS day, o."orderNo", COALESCE(o."couponCode", o."discountReason", '') AS reason, u.name AS staff, b.subtotal, b.discount
     FROM "Bill" b JOIN "Order" o ON o.id = b."orderId" LEFT JOIN "User" u ON u.id = o."waiterId" WHERE b."branchId" IN (${bIn(s)}) AND b.status <> 'VOID' AND b.discount > 0 AND b."createdAt" >= ${s.from} AND b."createdAt" < ${s.to} ORDER BY b."createdAt" DESC LIMIT 2000`;
-  const comp = await prisma.$queryRaw<any[]>`SELECT to_char(o."createdAt", 'YYYY-MM-DD') AS day, o."orderNo", 'Complimentary: ' || oi.name AS reason, u.name AS staff, (oi."unitPrice"*oi.quantity)::bigint AS subtotal, (oi."unitPrice"*oi.quantity)::bigint AS discount
+  const comp = await prisma.$queryRaw<any[]>`SELECT to_char(${localTs('o."createdAt"')}, 'YYYY-MM-DD') AS day, o."orderNo", 'Complimentary: ' || oi.name AS reason, u.name AS staff, (oi."unitPrice"*oi.quantity)::bigint AS subtotal, (oi."unitPrice"*oi.quantity)::bigint AS discount
     FROM "OrderItem" oi JOIN "Order" o ON o.id = oi."orderId" LEFT JOIN "User" u ON u.id = o."waiterId" WHERE o."branchId" IN (${bIn(s)}) AND oi.complimentary AND o."createdAt" >= ${s.from} AND o."createdAt" < ${s.to}`;
   const r = [...rows, ...comp].map((x) => ({ day: x.day, orderNo: x.orderNo, reason: x.reason, staff: x.staff, subtotal: n(x.subtotal), discount: n(x.discount) }));
   const cols: Report["columns"] = [{ key: "day", label: "Date" }, { key: "orderNo", label: "Order #" }, { key: "reason", label: "Reason / coupon" }, { key: "staff", label: "Staff" }, { key: "subtotal", label: "Order value", type: "money" }, { key: "discount", label: "Discount", type: "money" }];
   return { title: "Discounts & complimentary", columns: cols, rows: r, totals: sumBy(r, cols) };
 }
 async function cancellations(s: Scope): Promise<Report> {
-  const rows = await prisma.$queryRaw<any[]>`SELECT to_char(o."createdAt", 'YYYY-MM-DD HH24:MI') AS at, o."orderNo", oi.name, oi.quantity, (oi."unitPrice"*oi.quantity)::bigint AS value, COALESCE(oi."cancelReason", o."cancelReason") AS reason, (oi."kotId" IS NOT NULL) AS sent
+  const rows = await prisma.$queryRaw<any[]>`SELECT to_char(${localTs('o."createdAt"')}, 'YYYY-MM-DD HH24:MI') AS at, o."orderNo", oi.name, oi.quantity, (oi."unitPrice"*oi.quantity)::bigint AS value, COALESCE(oi."cancelReason", o."cancelReason") AS reason, (oi."kotId" IS NOT NULL) AS sent
     FROM "OrderItem" oi JOIN "Order" o ON o.id = oi."orderId" WHERE o."branchId" IN (${bIn(s)}) AND oi.status = 'CANCELLED' AND o."createdAt" >= ${s.from} AND o."createdAt" < ${s.to} AND COALESCE(o."cancelReason",'') NOT LIKE 'Merged%' ORDER BY o."createdAt" DESC LIMIT 2000`;
   const r = rows.map((x) => ({ at: x.at, orderNo: x.orderNo, name: x.name, quantity: x.quantity, value: n(x.value), reason: x.reason, sentToKitchen: x.sent ? "yes" : "no" }));
   const cols: Report["columns"] = [{ key: "at", label: "When" }, { key: "orderNo", label: "Order #" }, { key: "name", label: "Item" }, { key: "quantity", label: "Qty", type: "number" }, { key: "value", label: "Value", type: "money" }, { key: "reason", label: "Reason" }, { key: "sentToKitchen", label: "Was cooked?" }];

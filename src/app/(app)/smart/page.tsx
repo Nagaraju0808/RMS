@@ -21,7 +21,7 @@ function Forecast() {
     <Card><h2 className="mb-2 font-semibold">Dishes expected per day – next 7 days</h2>
       <BarChart label="Forecast dishes per day" data={d.days.map((x: any) => ({ ...x, day: new Date(x.date + "T00:00").toLocaleDateString("en-IN", { weekday: "short", day: "numeric" }) }))} x="day" y="qty" /></Card>
     <Table head={["Dish", "Next 7 days", "Trend (last 7 vs previous 7 days)", ...d.days.map((x: any) => new Date(x.date + "T00:00").toLocaleDateString("en-IN", { weekday: "short" }))]}
-      rows={d.items.map((i: any) => [i.name, <b key="t">{i.total}</b>, <span key="tr" className={i.trend > 0 ? "text-green-700" : i.trend < 0 ? "text-red-600" : ""}>{i.trend > 0 ? "▲" : i.trend < 0 ? "▼" : ""} {Math.abs(i.trend)}%</span>, ...i.days.map((x: any) => Math.round(x.qty))])} /></div>;
+      rows={d.items.map((i: any) => [i.name, <b key="t">{i.total}</b>, <span key="tr" className={i.trend > 0 ? "text-green-700" : i.trend < 0 ? "text-red-600" : ""}>{i.trend > 0 ? "+" : i.trend < 0 ? "−" : ""}{Math.abs(i.trend)}%</span>, ...i.days.map((x: any) => Math.round(x.qty))])} /></div>;
 }
 function Purchase() {
   const [days, setDays] = React.useState(2); const [d, setD] = React.useState<any>(null);
@@ -47,7 +47,7 @@ function Reviews() {
   const [d, setD] = React.useState<any>(null);
   React.useEffect(() => { api("/api/smart/reviews").then(setD); }, []);
   if (!d) return <p className="muted">Reading reviews…</p>;
-  return <div className="space-y-3"><Card><div className="text-sm muted">Last 30 days</div><div className="text-2xl font-bold">{d.average}★ from {d.count} ratings</div></Card>
+  return <div className="space-y-3"><Card><div className="text-sm muted">Last 30 days</div><div className="text-2xl font-semibold tabular-nums">{d.average} of 5 from {d.count} ratings</div></Card>
     {d.aiPoints && <Card><h2 className="mb-1 font-semibold">AI summary</h2><ul className="list-disc pl-5">{d.aiPoints.map((p: string, i: number) => <li key={i}>{p}</li>)}</ul></Card>}
     <Card><h2 className="mb-2 font-semibold">What customers talk about</h2>{d.points.map((p: any) => <div key={p.theme} className="flex justify-between py-1"><span>{p.theme}</span><span>{p.mentions} mentions <Badge color={p.sentiment === "positive" ? "green" : p.sentiment === "negative" ? "red" : "yellow"}>{p.sentiment}</Badge></span></div>)}</Card></div>;
 }

@@ -13,7 +13,7 @@ export default function MyShift() {
   const mine = shifts.flatMap((s) => s.assignments.filter((x: any) => x.user.id === me.user.id).map((x: any) => ({ ...x, shift: s }))).sort((x, y) => x.date.localeCompare(y.date));
   return <div className="mx-auto max-w-2xl space-y-4">
     <PageHeader title="My shift" />
-    <Card className="flex items-center justify-between"><div><div className="text-lg">{a.onDuty ? "🟢 You are on duty" : "⚪ You are off duty"}</div><div className="text-sm muted">This month: {a.hours} hours</div></div>
+    <Card className="flex items-center justify-between"><div><div className="text-lg">{a.onDuty ? "You are on duty" : "You are off duty"}</div><div className="text-sm muted">This month: {a.hours} hours</div></div>
       <Button size="xl" variant={a.onDuty ? "danger" : "success"} onClick={() => api("/api/attendance", { body: { type: a.onDuty ? "CLOCK_OUT" : "CLOCK_IN" } }).then(() => { toast(a.onDuty ? "Clocked out" : "Clocked in"); load(); }).catch((e) => toast(e.message, "err"))}>{a.onDuty ? "Clock out" : "Clock in"}</Button></Card>
     <Card><h2 className="mb-2 font-semibold">My upcoming shifts</h2>{mine.length ? mine.map((x) => <div key={x.id} className="text-sm">{new Date(x.date + "T00:00").toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" })} – {x.shift.name} ({x.shift.startTime}–{x.shift.endTime})</div>) : <p className="text-sm muted">No shifts assigned.</p>}</Card>
     <Card><h2 className="mb-2 font-semibold">Ask for leave</h2>

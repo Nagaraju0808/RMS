@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { Trash2 } from "lucide-react";
 import { Badge, Button, Card, Input, PageHeader, Select, Table, Tabs, useToast } from "@/components/ui";
 import { api, rs } from "@/lib/client";
 import { useApp, useLive } from "@/components/app/AppContext";
@@ -35,7 +36,7 @@ export default function DeliveriesPage() {
           <Input name="name" placeholder="Zone name" className="w-36" required /><Input name="pins" placeholder="Pincodes (500034, 500033)" className="w-64" required />
           <Input name="charge" type="number" placeholder="Charge ₹" className="w-28" required /><Input name="min" type="number" placeholder="Min order ₹" className="w-32" /><Input name="eta" type="number" placeholder="ETA min" className="w-24" /><Button>Add zone</Button></form>
         {zones.map((z) => <div key={z.id} className="flex justify-between border-b border-app py-2 text-sm"><span><b>{z.name}</b> · {z.pincodes.join(", ")} · charge {rs(z.charge)} · min {rs(z.minOrder)} · {z.etaMins} min</span>
-          <Button size="sm" variant="ghost" onClick={() => run(api(`/api/delivery-zones/${z.id}`, { method: "DELETE" }), "Deleted")}>🗑</Button></div>)}
+          <Button size="sm" variant="ghost" aria-label="Delete zone" onClick={() => run(api(`/api/delivery-zones/${z.id}`, { method: "DELETE" }), "Deleted")}><Trash2 size={15} /></Button></div>)}
       </Card>}
       {node}
     </div>

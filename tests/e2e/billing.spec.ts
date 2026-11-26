@@ -17,5 +17,5 @@ test("cashier bills an order and takes split payment", async ({ page }) => {
   await amounts.first().fill(String(due - 50));
   await amounts.nth(1).fill("50");
   await page.getByRole("button", { name: "Take payment" }).click();
-  await expect(page.getByText("Paid ✓")).toBeVisible();
+  await expect(page.getByText("Paid in full")).toBeVisible();
 });
